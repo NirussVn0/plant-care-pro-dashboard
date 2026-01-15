@@ -71,10 +71,21 @@ export const PlantCard: React.FC<PlantCardProps> = ({ plant, onWater }) => {
       <div className={styles.actions}>
         <button 
            className={styles.actionButton}
-           onClick={() => onWater(plant.id)}
+           onClick={(e) => {
+             e.stopPropagation();
+             onWater(plant.id);
+           }}
+           style={{ marginBottom: '0.5rem' }}
         >
-           {isThirsty ? 'Water Now' : 'View Details'}
+           {isThirsty ? 'Water Now' : 'Mark Watered'}
         </button>
+        <a 
+          href={`/my-jungle/${plant.id}`}
+          className={styles.actionButton}
+          style={{ textAlign: 'center', display: 'block', textDecoration: 'none' }}
+        >
+           View Details
+        </a>
       </div>
     </div>
   );
