@@ -1,8 +1,13 @@
 
 'use client';
 
+import React, { useState, useEffect } from 'react';
+import { Plant, PlantProps } from '@/core/domain/Plant';
+import { PlantService } from '@/core/services/PlantService';
+import { LocalPlantRepository } from '@/core/infrastructure/LocalPlantRepository';
+import { PlantCard } from '@/components/plants/PlantCard';
 import { AddPlantModal } from '@/components/plants/AddPlantModal';
-import { PlantProps } from '@/core/domain/Plant';
+import { PiPlus } from 'react-icons/pi';
 
 // Service instantiation (In a real app, use Dependency Injection container)
 const repo = new LocalPlantRepository();
