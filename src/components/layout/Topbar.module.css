@@ -1,0 +1,63 @@
+
+.topbar {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Right align items for now */
+    padding: 0 var(--sp-xl);
+    background-color: transparent; /* Transparent as per design, background is body color */
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-md);
+}
+
+.searchBar {
+    background-color: #E8ECEB;
+    border-radius: var(--rd-full);
+    padding: var(--sp-sm) var(--sp-lg);
+    border: none;
+    outline: none;
+    color: var(--co-text-main);
+    width: 300px;
+    transition: width var(--tr-fast);
+}
+
+.searchBar:focus {
+    width: 320px;
+    box-shadow: 0 0 0 2px var(--co-primary-light);
+}
+
+.iconButton {
+    background-color: #fff; /* White background for notifications/settings */
+    border: none;
+    padding: var(--sp-sm);
+    border-radius: var(--rd-full);
+    cursor: pointer;
+    color: var(--co-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--tr-fast);
+    box-shadow: var(--sh-sm);
+}
+
+.iconButton:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sh-md);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--rd-full);
+    background-color: var(--co-primary-light);
+    border: 2px solid #fff;
+    box-shadow: var(--sh-sm);
+    cursor: pointer;
+}
