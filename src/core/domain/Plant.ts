@@ -54,4 +54,6 @@ export class Plant extends Entity<PlantProps> {
   get schedule(): number { return this.props.waterScheduleDays; }
   get location(): string { return this.props.location; }
   get light(): string { return this.props.lightRequirement; }
+  get humidityRequirement(): string { return this.props.humidityRequirement; }
+  get lastWateredDate(): Date | undefined { return this.props.lastWateredDate; }
 }

@@ -3,11 +3,12 @@
 
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import anime from 'animejs';
-import { PiArrowRight } from 'react-icons/pi';
+// import anime from 'animejs';
+// import { PiArrowRight } from 'react-icons/pi';
 import styles from './Hero.module.css';
 
 export const Hero = () => {
+  /*
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
@@ -33,6 +34,7 @@ export const Hero = () => {
       duration: 1200
     }, '-=800');
   }, []);
+  */
 
   return (
     <section className={styles.hero}>
@@ -40,22 +42,23 @@ export const Hero = () => {
       <div className={styles.blob + ' ' + styles.blob2}></div>
       
       <div className={styles.content}>
-        <h1 ref={titleRef} className={styles.title}>
+        <h1 className={styles.title}>
           Master Your <br />
           <span style={{ color: 'var(--co-primary-light)' }}>Urban Jungle</span>
         </h1>
-        <p ref={subtitleRef} className={styles.subtitle}>
+        <p className={styles.subtitle}>
           Track, nurture, and grow your plant collection with precision using our advanced, OOP-architected management system.
         </p>
-        <Link href="/dashboard" ref={ctaRef} className={styles.ctaButton}>
-          Get Started <PiArrowRight />
+        <Link href="/dashboard" className={styles.ctaButton}>
+          Get Started {/* <PiArrowRight /> */}
         </Link>
       </div>
 
       <div className={styles.imageContainer}>
         {/* Using a high-quality placeholder that matches the aesthetic */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
-          ref={imageRef}
+           
           src="https://images.unsplash.com/photo-1545241047-60f7fab979ae?q=80&w=2669&auto=format&fit=crop" 
           alt="Lush Monstera Plant" 
           className={styles.heroImage}
