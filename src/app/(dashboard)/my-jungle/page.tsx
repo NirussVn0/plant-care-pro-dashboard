@@ -1,12 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Plant } from '@/core/domain/Plant';
-import { PlantService } from '@/core/services/PlantService';
-import { LocalPlantRepository } from '@/core/infrastructure/LocalPlantRepository';
-import { PlantCard } from '@/components/plants/PlantCard';
-import { PiPlus } from 'react-icons/pi';
+import { AddPlantModal } from '@/components/plants/AddPlantModal';
+import { PlantProps } from '@/core/domain/Plant';
 
 // Service instantiation (In a real app, use Dependency Injection container)
 const repo = new LocalPlantRepository();
@@ -15,6 +11,7 @@ const service = new PlantService(repo);
 export default function MyJunglePage() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchPlants = React.useCallback(async () => {
     setLoading(true);
@@ -32,29 +29,8 @@ export default function MyJunglePage() {
     fetchPlants(); // Refresh
   };
 
-  const seedData = async () => {
-    // Seed some initial plants if empty
-    await service.registerPlant({
-        name: 'Monstera Deliciosa',
-        species: 'Swiss Cheese Plant',
-        location: 'Living Room',
-        waterScheduleDays: 7,
-        lightRequirement: 'MEDIUM',
-        humidityRequirement: 'HIGH',
-        acquiredDate: new Date(),
-        imageUrl: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=2664&auto=format&fit=crop',
-        lastWateredDate: new Date(Date.now() - 86400000 * 8) // Water 8 days ago (Thirsty)
-    });
-    await service.registerPlant({
-        name: 'Fiddle Leaf Fig',
-        species: 'Ficus Lyrata',
-        location: 'Bedroom',
-        waterScheduleDays: 10,
-        lightRequirement: 'HIGH',
-        humidityRequirement: 'MEDIUM',
-        acquiredDate: new Date(),
-        imageUrl: 'https://images.unsplash.com/photo-1597055181300-e313d4229ea4?q=80&w=2574&auto=format&fit=crop'
-    });
+  const handleAddPlant = async (props: PlantProps) => {
+    await service.registerPlant(props);
     fetchPlants();
   };
 
@@ -66,16 +42,22 @@ export default function MyJunglePage() {
             <p style={{ color: 'var(--co-text-muted)' }}>Manage and track your personal plant collection.</p>
          </div>
          <button 
-           onClick={seedData}
+           onClick={() => setIsModalOpen(true)}
            style={{
              display: 'flex', alignItems: 'center', gap: '8px',
              background: 'var(--co-primary)', color: 'white', border: 'none',
              padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600
            }}
          >
-           <PiPlus /> Add New Plant (Seed)
+           <PiPlus /> Add New Plant
          </button>
       </div>
+
+      <AddPlantModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSubmit={handleAddPlant} 
+      />
 
       {loading ? (
         <p>Loading your jungle...</p>
