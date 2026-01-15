@@ -1,12 +1,35 @@
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DailyTasks from "@/components/dashboard/DailyTasks";
+import MyJunglePreview from "@/components/dashboard/MyJunglePreview";
+import GrowthTrends from "@/components/dashboard/GrowthTrends";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold text-brand-dark mb-4">PlantCarePro</h1>
-      <div className="p-6 bg-surface rounded-xl shadow-lg border border-gray-100">
-        <p className="text-text-muted">
-          System Initialized. Ready for development.
-        </p>
+    <div className="min-h-full">
+      <DashboardHeader />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Daily Tasks (Sidebar-like) */}
+        <div className="lg:col-span-3">
+          <DailyTasks />
+        </div>
+
+        {/* Center/Right Area */}
+        <div className="lg:col-span-9 space-y-8">
+          {/* Row 1: Jungle & Trends */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <MyJunglePreview />
+            </div>
+            <div className="md:col-span-1">
+              <GrowthTrends />
+            </div>
+          </div>
+
+          {/* Row 2: Nutrient Schedule placeholder or other widgets */}
+          {/* Can expand here later */}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
