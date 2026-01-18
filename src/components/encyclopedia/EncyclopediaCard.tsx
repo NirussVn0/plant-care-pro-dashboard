@@ -1,19 +1,24 @@
 "use client";
 
-import { Plant } from "@/models/Plant"; // We might need an extended interface for Encyclopedia
+import { Plant } from "@/models/Plant";
 import { MdAddCircle, MdFavoriteBorder, MdSunny, MdWaterDrop, MdAir } from "react-icons/md";
 
-// Extended interface just for visualization if needed, or use Plant
-export default function EncyclopediaCard({ plant }: { plant: Plant }) {
-  // Mock data mapping since our current Plant model might be simple
-  const isEasy = plant.health > 80;
+interface EncyclopediaCardProps {
+  plant: Plant;
+}
+
+/**
+ * Card component for displaying plant information in the Encyclopedia.
+ * Shows plant details, difficulty level, and care requirements.
+ */
+export default function EncyclopediaCard({ plant }: EncyclopediaCardProps) {
+  const getDifficultyLevel = (health: number): string => {
+    return health > 80 ? "Easy" : "Expert";
+  };
 
   return (
     <div className="bento-card rounded-xl overflow-hidden border border-[#e6f4f2] dark:border-[#354545] group hover:shadow-lg transition-all duration-300">
-      <div
-        className="h-56 bg-cover bg-center relative"
-        style={{ backgroundImage: `url(${plant.images[0]})` }}
-      >
+      <div className="h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${plant.images[0]})` }}>
         <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/50 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-primary uppercase tracking-wide">
           Tropical
         </div>
@@ -25,15 +30,11 @@ export default function EncyclopediaCard({ plant }: { plant: Plant }) {
       <div className="p-5">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
-              {plant.name}
-            </h4>
-            <p className="text-xs text-primary italic mt-0.5">
-              {plant.scientificName}
-            </p>
+            <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{plant.name}</h4>
+            <p className="text-xs text-primary italic mt-0.5">{plant.scientificName}</p>
           </div>
           <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-bold uppercase rounded-md">
-            {isEasy ? "Easy" : "Expert"}
+            {getDifficultyLevel(plant.health)}
           </span>
         </div>
         <p className="text-sm text-text-main/70 dark:text-text-inverse/70 line-clamp-2 mt-3 mb-4">

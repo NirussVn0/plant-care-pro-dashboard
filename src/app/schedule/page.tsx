@@ -28,7 +28,12 @@ export default function SchedulePage() {
                 <CalendarGrid selectedDate={selectedDate} onSelectDate={setSelectedDate} />
             </div>
             <div className="lg:col-span-4 h-full">
-                <DayDetails date={selectedDate} tasks={tasks} />
+                <DayDetails 
+                  selectedDate={selectedDate} 
+                  tasks={tasks} 
+                  onCompleteTask={(id) => console.log("Complete task:", id)}
+                  onClose={() => console.log("Close")}
+                />
             </div>
          </div>
     </div>

@@ -10,14 +10,27 @@ interface PlantCardProps {
   staggerIndex?: number;
 }
 
+/**
+ * Card component for displaying individual plant information.
+ * Shows plant image, name, room, and care status indicators.
+ */
 export default function PlantCard({ plant, staggerIndex = 0 }: PlantCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (cardRef.current) {
-        fadeInUp(cardRef.current, staggerIndex * 100);
+      fadeInUp(cardRef.current, staggerIndex * 100);
     }
   }, [staggerIndex]);
+
+  const getNeedsPercentage = (level: string): string => {
+    const percentages: Record<string, string> = {
+      HIGH: "90%",
+      MED: "60%",
+      LOW: "30%",
+    };
+    return percentages[level] || "50%";
+  };
 
   return (
     <article
@@ -28,7 +41,7 @@ export default function PlantCard({ plant, staggerIndex = 0 }: PlantCardProps) {
         className="h-64 bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: `url(${plant.images[0]})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-primary uppercase tracking-wider shadow-sm">
           {plant.room}
         </div>
@@ -42,13 +55,10 @@ export default function PlantCard({ plant, staggerIndex = 0 }: PlantCardProps) {
           <h3 className="font-bold text-lg text-text-main dark:text-text-inverse leading-tight">
             {plant.name}
           </h3>
-          <p className="text-xs text-primary italic font-medium">
-            {plant.scientificName}
-          </p>
+          <p className="text-xs text-primary italic font-medium">{plant.scientificName}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-auto">
-          {/* Sunlight */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] font-bold text-primary uppercase tracking-tighter">
               <div className="flex items-center gap-1">
@@ -59,31 +69,20 @@ export default function PlantCard({ plant, staggerIndex = 0 }: PlantCardProps) {
             <div className="h-1.5 w-full bg-[#e6f4f2] dark:bg-[#354545] rounded-full overflow-hidden">
               <div
                 className="h-full bg-sun-yellow rounded-full"
-                style={{
-                  width:
-                    plant.needs.light === "HIGH"
-                      ? "90%"
-                      : plant.needs.light === "MED"
-                        ? "60%"
-                        : "30%",
-                }}
-              ></div>
+                style={{ width: getNeedsPercentage(plant.needs.light) }}
+              />
             </div>
           </div>
 
-          {/* Hydration */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] font-bold text-primary uppercase tracking-tighter">
               <div className="flex items-center gap-1">
                 <MdWaterDrop className="text-xs text-blue-400" /> Hydration
               </div>
-              <span>Good</span> 
+              <span>Good</span>
             </div>
             <div className="h-1.5 w-full bg-[#e6f4f2] dark:bg-[#354545] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-400 rounded-full"
-                style={{ width: `${plant.health}%` }}
-              ></div>
+              <div className="h-full bg-blue-400 rounded-full" style={{ width: `${plant.health}%` }} />
             </div>
           </div>
         </div>

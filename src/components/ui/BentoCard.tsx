@@ -12,12 +12,16 @@ interface BentoCardProps {
   delay?: number;
 }
 
+/**
+ * Reusable card component with bento-style design.
+ * Features optional title, header actions, and entrance animation.
+ */
 export default function BentoCard({ children, className, title, headerAction, delay = 0 }: BentoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (cardRef.current) {
-        fadeInUp(cardRef.current, delay);
+      fadeInUp(cardRef.current, delay);
     }
   }, [delay]);
 

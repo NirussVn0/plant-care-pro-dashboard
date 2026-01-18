@@ -1,5 +1,9 @@
-import { Plant, PlantNeeds } from "@/models/Plant"; // Import from models
+import { Plant } from "@/models/Plant";
 
+/**
+ * Interface for Plant Service operations.
+ * Defines contract for plant data access and management.
+ */
 export interface IPlantService {
   getAllPlants(): Promise<Plant[]>;
   getPlantById(id: string): Promise<Plant | undefined>;
@@ -7,8 +11,12 @@ export interface IPlantService {
   getRooms(): Promise<string[]>;
 }
 
+/**
+ * Service class for managing plant data.
+ * Implements IPlantService interface with mock data storage.
+ */
 export class PlantService implements IPlantService {
-  private readonly PLANTS: Plant[] = [
+  private readonly plants: Plant[] = [
     {
       id: "1",
       name: "Monstera Deliciosa",
@@ -62,20 +70,22 @@ export class PlantService implements IPlantService {
   ];
 
   async getAllPlants(): Promise<Plant[]> {
-    return Promise.resolve(this.PLANTS);
+    return Promise.resolve(this.plants);
   }
 
   async getPlantById(id: string): Promise<Plant | undefined> {
-    return Promise.resolve(this.PLANTS.find((p) => p.id === id));
+    return Promise.resolve(this.plants.find((plant) => plant.id === id));
   }
 
   async getPlantsByRoom(room: string): Promise<Plant[]> {
-    if (room === "All Rooms") return this.getAllPlants();
-    return Promise.resolve(this.PLANTS.filter((p) => p.room === room));
+    if (room === "All Rooms") {
+      return this.getAllPlants();
+    }
+    return Promise.resolve(this.plants.filter((plant) => plant.room === room));
   }
 
   async getRooms(): Promise<string[]> {
-    const rooms = new Set(this.PLANTS.map((p) => p.room));
-    return Promise.resolve(["All Rooms", ...Array.from(rooms)]);
+    const uniqueRooms = new Set(this.plants.map((plant) => plant.room));
+    return Promise.resolve(["All Rooms", ...Array.from(uniqueRooms)]);
   }
 }
