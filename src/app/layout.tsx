@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { clsx } from "clsx";
-import Header from "@/components/layout/Header";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import AppShell from "@/components/layout/AppShell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,10 +31,9 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider>
-          <Header />
-          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

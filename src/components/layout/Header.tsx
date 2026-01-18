@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { MdSearch, MdNotifications, MdMenu, MdDarkMode, MdLightMode, MdSettings, MdLogout, MdPerson } from "react-icons/md";
 import { IoLeaf } from "react-icons/io5";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_LINKS = [
   { name: "Dashboard", href: "/" },
@@ -16,12 +17,13 @@ const NAV_LINKS = [
 
 /**
  * Application header component with navigation, search, and user controls.
- * Includes user dropdown with theme toggle.
+ * Includes user dropdown with theme toggle and logout.
  */
 export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -33,12 +35,9 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleThemeToggle = () => {
-    if (resolvedTheme === "dark") {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
+  const handleLogout = () => {
+    setIsUserMenuOpen(false);
+    logout();
   };
 
   return (
@@ -82,19 +81,25 @@ export default function Header() {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="size-9 rounded-full bg-cover bg-center border-2 border-primary cursor-pointer hover:opacity-90 transition-opacity focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="size-9 rounded-full bg-cover bg-center border-2 border-primary cursor-pointer hover:opacity-90 transition-opacity focus:ring-2 focus:ring-primary focus:ring-offset-2 overflow-hidden"
               style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4L-yeUJzasM-KnmHpRaGOy4Q0P6W1DT_fcBCYMI9VHN5JwqkgvIC1iIDeTi10qij1hTQSCBtghVVq5gdUQbTVQGaIGNbMhwQFFENUUDdf0_33CoO0HSQ_ZDqjOFUpFEqR-10Jroz1pIw6wVySVHaCNY9TXc2S-vUJwgOnA_hpHFbXpxnDFve4_NymV5jhbKa4ngCnE4S3x9sOy6HUhz9Fj6uRNdqj8_xgtAQ-Dgjcfg64jFQOvUX-Vgm04VBriTnh66Q0mOeJAQ")',
+                backgroundImage: user?.avatar ? `url("${user.avatar}")` : undefined,
+                backgroundColor: !user?.avatar ? "#007969" : undefined,
               }}
               aria-label="User menu"
-            />
+            >
+              {!user?.avatar && (
+                <span className="text-white font-bold text-sm flex items-center justify-center h-full">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </span>
+              )}
+            </button>
 
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#2d3a3a] rounded-xl shadow-xl border border-[#e6f4f2] dark:border-[#354545] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="px-4 py-3 border-b border-[#e6f4f2] dark:border-[#354545]">
-                  <p className="font-bold text-sm">Sage</p>
-                  <p className="text-xs text-text-muted">Master Gardener</p>
+                  <p className="font-bold text-sm">{user?.name || "Guest"}</p>
+                  <p className="text-xs text-text-muted">Plant Enthusiast</p>
                 </div>
 
                 <div className="py-2">
@@ -137,7 +142,10 @@ export default function Header() {
                 </div>
 
                 <div className="border-t border-[#e6f4f2] dark:border-[#354545] py-2">
-                  <button className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors">
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
+                  >
                     <MdLogout size={18} />
                     <span>Log out</span>
                   </button>
