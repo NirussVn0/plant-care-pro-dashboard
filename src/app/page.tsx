@@ -2,6 +2,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DailyTasks from "@/components/dashboard/DailyTasks";
 import MyJunglePreview from "@/components/dashboard/MyJunglePreview";
 import GrowthTrends from "@/components/dashboard/GrowthTrends";
+import CareLogs from "@/components/dashboard/CareLogs";
 
 export default function Home() {
   return (
@@ -17,17 +18,15 @@ export default function Home() {
         {/* Center/Right Area */}
         <div className="lg:col-span-9 space-y-8">
           {/* Row 1: Jungle & Trends */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="md:col-span-2 space-y-6">
               <MyJunglePreview />
+              <CareLogs />
             </div>
             <div className="md:col-span-1">
               <GrowthTrends />
             </div>
           </div>
-
-          {/* Row 2: Nutrient Schedule placeholder or other widgets */}
-          {/* Can expand here later */}
         </div>
       </div>
     </div>

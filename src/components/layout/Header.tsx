@@ -1,62 +1,70 @@
 import Link from "next/link";
-import { FaBell, FaCog, FaSearch, FaUser } from "react-icons/fa";
-import { IoLeaf } from "react-icons/io5"; // Using IoLeaf for the plant logo feel
+import { MdSearch, MdNotifications, MdSettings, MdMenu } from "react-icons/md";
+import { IoLeaf } from "react-icons/io5";
+
+const NAV_LINKS = [
+  { name: "Dashboard", href: "/" },
+  { name: "My Jungle", href: "/jungle" },
+  { name: "Schedule", href: "/schedule" },
+  { name: "Encyclopedia", href: "/encyclopedia" },
+  { name: "Care Logs", href: "/logs" },
+];
 
 export default function Header() {
   return (
-    <header className="flex items-center justify-between px-8 py-4 bg-background sticky top-0 z-50">
-      {/* Logo Section */}
-      <Link href="/" className="flex items-center gap-3 group">
-        <div className="bg-brand-dark p-2 rounded-lg text-white group-hover:bg-brand-primary transition-colors duration-300">
-          <IoLeaf size={24} />
-        </div>
-        <span className="text-xl font-bold text-brand-dark tracking-tight">
-          PlantCarePro
-        </span>
-      </Link>
-
-      {/* Navigation Links - Desktop */}
-      <nav className="hidden md:flex items-center gap-8">
-        {[
-          { name: "Dashboard", href: "/" },
-          { name: "My Jungle", href: "/jungle" },
-          { name: "Schedule", href: "/schedule" },
-          { name: "Encyclopedia", href: "/encyclopedia" },
-          { name: "Care Logs", href: "/logs" },
-        ].map((link) => (
-          <Link
-            key={link.name}
-            href={link.href}
-            className="text-text-muted hover:text-brand-primary font-medium transition-colors text-sm"
-          >
-            {link.name}
+    <header className="sticky top-0 z-50 w-full border-b border-white dark:border-[#354545] bg-opacity-80 backdrop-blur-md bg-background-light dark:bg-background-dark px-6 lg:px-20 py-3 transition-colors duration-300">
+      <div className="flex items-center justify-between gap-8 text-text-main dark:text-text-inverse">
+        <div className="flex items-center gap-8">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 text-primary hover:text-secondary transition-colors">
+            <div className="size-8">
+               <IoLeaf size={32} />
+            </div>
+            <h2 className="text-xl font-bold leading-tight tracking-tight font-display">PlantCare Pro</h2>
           </Link>
-        ))}
-      </nav>
 
-      {/* Action Icons */}
-      <div className="flex items-center gap-4">
-        {/* Search Bar - Visual only for now */}
-        <div className="hidden lg:flex items-center bg-white px-4 py-2 rounded-full border border-gray-200 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary transition-all w-64">
-          <FaSearch className="text-gray-400 mr-2" />
-          <input
-            type="text"
-            placeholder="Search plants..."
-            className="bg-transparent border-none outline-none text-sm text-text-main w-full placeholder:text-gray-400"
-          />
+          {/* Desktop Navigation */}
+      <nav className="hidden md:flex items-center gap-6">
+        {NAV_LINKS.map((link) => (
+            <Link
+                key={link.name}
+                href={link.href}
+                className="text-text-muted hover:text-primary transition-colors font-medium text-sm"
+            >
+                {link.name}
+            </Link>
+        ))}
+      </nav>    </div>
         </div>
 
-        <button className="p-2 text-brand-dark bg-brand-light rounded-lg hover:bg-brand-primary hover:text-white transition-colors">
-          <FaBell size={18} />
-        </button>
-        <button className="p-2 text-brand-dark bg-brand-light rounded-lg hover:bg-brand-primary hover:text-white transition-colors">
-          <FaCog size={18} />
-        </button>
-        <button className="h-10 w-10 rounded-full bg-brand-primary flex items-center justify-center text-white overflow-hidden border-2 border-white shadow-sm">
-          {/* Placeholder for user avatar */}
-          <FaUser />
-          {/* TODO: proper image component */}
-        </button>
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center bg-white dark:bg-[#2d3a3a] rounded-lg px-3 py-1.5 border border-[#e6f4f2] dark:border-[#354545]">
+            <MdSearch className="text-primary text-lg" />
+            <input 
+                className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-text-muted w-40 ml-2 focus:outline-none" 
+                placeholder="Search plants..." 
+                type="text"
+            />
+          </div>
+
+          <button className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] text-primary hover:bg-[#d6ebe9] dark:hover:bg-[#354545] transition-colors shadow-sm">
+            <MdNotifications size={20} />
+          </button>
+          
+          <button aria-label="Settings" className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] text-primary hover:bg-[#d6ebe9] dark:hover:bg-[#354545] transition-colors group shadow-sm">
+            <MdSettings size={20} className="group-hover:rotate-45 transition-transform duration-300" />
+          </button>
+
+          {/* User Avatar Placeholder - Replace with Image component when implementing User Service */}
+          <div className="size-9 rounded-full bg-cover bg-center border-2 border-primary cursor-pointer hover:opacity-90 transition-opacity" 
+               style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4L-yeUJzasM-KnmHpRaGOy4Q0P6W1DT_fcBCYMI9VHN5JwqkgvIC1iIDeTi10qij1hTQSCBtghVVq5gdUQbTVQGaIGNbMhwQFFENUUDdf0_33CoO0HSQ_ZDqjOFUpFEqR-10Jroz1pIw6wVySVHaCNY9TXc2S-vUJwgOnA_hpHFbXpxnDFve4_NymV5jhbKa4ngCnE4S3x9sOy6HUhz9Fj6uRNdqj8_xgtAQ-Dgjcfg64jFQOvUX-Vgm04VBriTnh66Q0mOeJAQ")' }}>
+          </div>
+          
+          <button className="md:hidden p-2 text-primary">
+              <MdMenu size={24} />
+          </button>
+        </div>
       </div>
     </header>
   );

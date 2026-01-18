@@ -1,106 +1,93 @@
-import Card from "@/components/ui/Card";
-import { FaEllipsisH } from "react-icons/fa";
-import { WiDaySunny, WiHumidity } from "react-icons/wi";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { MdGridView, MdList, MdMoreHoriz, MdSunny, MdWaterDrop } from "react-icons/md";
+import ServiceFactory from "@/services/ServiceFactory";
+import { Plant } from "@/models/Plant";
 
 export default function MyJunglePreview() {
+  const [plants, setPlants] = useState<Plant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlants = async () => {
+        try {
+            // Get first 2 plants for preview
+            const allPlants = await ServiceFactory.getPlantService().getAllPlants();
+            setPlants(allPlants.slice(0, 2));
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchPlants();
+  }, []);
+
   return (
-    <Card className="h-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-brand-dark">My Jungle</h2>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg font-display text-text-main dark:text-text-inverse">My Jungle</h3>
         <div className="flex gap-2">
-          <button className="p-2 hover:bg-brand-light rounded-lg transition-colors">
-            {/* Grid Icon */}
-            <div className="w-4 h-4 bg-gray-300 rounded-sm"></div>
-          </button>
-          <button className="p-2 hover:bg-brand-light rounded-lg transition-colors">
-            {/* List Icon */}
-            <div className="w-4 h-4 bg-gray-300 rounded-sm"></div>
-          </button>
+            <button className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] text-text-muted hover:text-primary transition-colors">
+                <MdGridView size={18} />
+            </button>
+            <button className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] text-text-muted hover:text-primary transition-colors">
+                <MdList size={18} />
+            </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Plant Card 1 */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-          <div className="relative aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden group">
-            {/* Image Placeholder - emulate the Monstera */}
-            <div className="absolute inset-0 bg-green-100/50 flex items-center justify-center text-brand-primary/30 font-bold text-4xl">
-              Monstera
-            </div>
-            <span className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-brand-primary">
-              Healthy
-            </span>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading ? (
+             [1, 2].map(i => <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"></div>)
+        ) : (
+            plants.map(plant => (
+                <div key={plant.id} className="bento-card group overflow-hidden">
+                    <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: `url(${plant.images[0]})` }}>
+                        <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/50 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-primary">
+                            {plant.health > 80 ? 'Healthy' : 'Needs Care'}
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 className="font-bold text-base leading-none font-display">{plant.name}</h4>
+                                <p className="text-xs text-text-muted mt-1 italic">{plant.scientificName}</p>
+                            </div>
+                            <button className="text-primary/40 hover:text-primary transition-colors">
+                                <MdMoreHoriz size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted uppercase tracking-tighter">
+                                    <MdSunny className="text-xs text-sun-yellow" /> Light
+                                </div>
+                                <div className="h-1 w-full bg-[#e6f4f2] dark:bg-[#354545] rounded-full overflow-hidden">
+                                     <div className={`h-full bg-sun-yellow rounded-full`} style={{ width: plant.needs.light === 'HIGH' ? '90%' : plant.needs.light === 'MED' ? '60%' : '30%' }}></div>
+                                </div>
+                            </div>
+                             <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted uppercase tracking-tighter">
+                                    <MdWaterDrop className="text-xs text-blue-400" /> Humidity
+                                </div>
+                                <div className="h-1 w-full bg-[#e6f4f2] dark:bg-[#354545] rounded-full overflow-hidden">
+                                     <div className={`h-full bg-blue-400 rounded-full`} style={{ width: plant.needs.humidity === 'HIGH' ? '90%' : plant.needs.humidity === 'MED' ? '60%' : '30%' }}></div>
+                                </div>
+                            </div>
+                        </div>
 
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <h3 className="font-bold text-lg text-brand-dark">
-                Monstera Deliciosa
-              </h3>
-              <p className="text-xs text-brand-primary italic">
-                Swiss Cheese Plant
-              </p>
-            </div>
-            <button className="text-gray-400 hover:text-brand-primary">
-              <FaEllipsisH />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 my-4">
-            <div className="flex items-center gap-1">
-              <WiDaySunny className="text-amber-400" size={20} />
-              <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-400 w-3/4"></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <WiHumidity className="text-blue-400" size={20} />
-              <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-400 w-1/2"></div>
-              </div>
-            </div>
-          </div>
-
-          <button className="w-full py-2 border border-gray-200 rounded-lg text-sm font-semibold text-text-muted hover:border-brand-primary hover:text-brand-primary transition-colors">
-            View Details
-          </button>
-        </div>
-
-        {/* Plant Card 2 */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-          <div className="relative aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden group">
-            <div className="absolute inset-0 bg-green-200/30 flex items-center justify-center text-brand-primary/30 font-bold text-4xl">
-              Ficus
-            </div>
-            <span className="absolute top-2 right-2 bg-rose-100 text-rose-500 px-2 py-1 rounded text-xs font-bold">
-              Needs Water
-            </span>
-          </div>
-
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <h3 className="font-bold text-lg text-brand-dark">
-                Fiddle Leaf Fig
-              </h3>
-              <p className="text-xs text-brand-primary italic">Ficus Lyrata</p>
-            </div>
-            <button className="text-gray-400 hover:text-brand-primary">
-              <FaEllipsisH />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 my-4">
-            {/* Stats... simplified */}
-            <div className="flex items-center gap-1 text-xs text-text-muted">
-              <WiDaySunny className="text-amber-400" /> High Light
-            </div>
-          </div>
-
-          <button className="w-full py-2 bg-brand-dark text-white rounded-lg text-sm font-semibold hover:bg-brand-primary transition-colors">
-            Water Now
-          </button>
-        </div>
+                        <button className="w-full mt-4 py-2 border border-primary text-primary hover:bg-primary hover:text-white transition-all text-xs font-bold rounded-lg uppercase tracking-wide">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            ))
+        )}
       </div>
-    </Card>
+    </div>
   );
 }
