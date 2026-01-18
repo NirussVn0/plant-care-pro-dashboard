@@ -2,60 +2,81 @@ import { Task } from "@/models/Task";
 
 export interface ITaskService {
   getDailyTasks(): Promise<Task[]>;
-  getUpcomingTasks(): Promise<Task[]>;
-  completeTask(id: string): Promise<boolean>;
+  getTasksByDate(date: Date): Promise<Task[]>;
 }
 
 export class TaskService implements ITaskService {
-  private tasks: Task[] = [
+  private readonly TASKS: Task[] = [
     {
-      id: '1',
-      type: 'WATER',
-      plantId: '1',
-      plantName: 'Monstera Deliciosa',
-      dueDate: new Date(), // Today
-      completed: false
-    },
-    {
-      id: '2',
-      type: 'MIST',
-      plantId: '2',
-      plantName: 'Calathea Ornata', // Changed from design to match typical data
-      dueDate: new Date(),
+      id: "1",
+      plantId: "1",
+      type: "WATER",
+      date: new Date(), // Today
       completed: false,
-      priority: 'MEDIUM'
     },
     {
-        id: '3',
-        type: 'FERTILIZE',
-        plantId: '1',
-        plantName: 'Ferns',
-        dueDate: new Date(),
+        id: "2",
+        plantId: "2",
+        type: "FERTILIZE",
+        date: new Date(),
         completed: false,
-        priority: 'LOW'
+    },
+    {
+        id: "3",
+        plantId: "4",
+        type: "MIST",
+        date: new Date(),
+        completed: true,
+    },
+    // Mock data for May 24 (or specific date logic)
+    {
+        id: "4",
+        plantId: "1",
+        type: "WATER",
+        date: new Date("2024-05-24"),
+        completed: false,
+        note: "Needs approx 500ml"
+    },
+    {
+        id: "5",
+        plantId: "5", // Calathea
+        type: "MIST",
+        date: new Date("2024-05-24"),
+        completed: false,
+        note: "Humidity is low (45%)"
+    },
+    {
+        id: "6",
+        plantId: "2", // Fiddle Leaf
+        type: "FERTILIZE",
+        date: new Date("2024-05-24"),
+        completed: false,
+        note: "Monthly fertilization"
     }
   ];
 
   async getDailyTasks(): Promise<Task[]> {
-    return new Promise((resolve) => 
-      setTimeout(() => resolve(this.tasks.filter(t => !t.completed)), 400)
-    );
+    // Return tasks for today
+    const today = new Date();
+    return this.getTasksByDate(today);
   }
 
-  async getUpcomingTasks(): Promise<Task[]> {
-      // Mock upcoming tasks
-       return new Promise((resolve) => 
-      setTimeout(() => resolve([]), 400)
-    );
-  }
+  async getTasksByDate(date: Date): Promise<Task[]> {
+    const target = date.toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
 
-  async completeTask(id: string): Promise<boolean> {
-    const task = this.tasks.find(t => t.id === id);
-    if (task) {
-      task.completed = true;
-      task.completedDate = new Date();
-      return true;
+    // For demo purposes, checking strictly for the mock values or fallback to today
+    if (target === '2024-05-24') {
+        return Promise.resolve(this.TASKS.filter(t => t.date.toISOString().startsWith('2024-05-24')));
     }
-    return false;
+    
+    return Promise.resolve(this.TASKS.filter(t => {
+        // If query is today, return tasks for today (regardless of exact time)
+        if (target === todayStr) {
+            const tDate = new Date(t.date).toISOString().split('T')[0];
+            return tDate === todayStr;
+        }
+        return false;
+    }));
   }
 }

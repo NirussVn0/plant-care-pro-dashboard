@@ -35,9 +35,7 @@ export default function Header() {
             </Link>
         ))}
       </nav>    </div>
-        </div>
-
-        {/* Right Side Actions */}
+          {/* Right Side Actions */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center bg-white dark:bg-[#2d3a3a] rounded-lg px-3 py-1.5 border border-[#e6f4f2] dark:border-[#354545]">
             <MdSearch className="text-primary text-lg" />
