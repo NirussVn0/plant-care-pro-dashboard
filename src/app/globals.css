@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4: Configure dark mode to use class selector */
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   /* Brand Colors from Design */
   --color-primary: #007969;
@@ -37,12 +40,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background: var(--color-background-dark);
-    color: var(--color-text-inverse);
-  }
+/* Dark mode body styles - triggered by .dark class on html */
+.dark body {
+  background: var(--color-background-dark);
+  color: var(--color-text-inverse);
 }
+
 
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
