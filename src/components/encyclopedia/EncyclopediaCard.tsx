@@ -2,6 +2,7 @@
 
 import { Plant } from "@/models/Plant";
 import { MdAddCircle, MdFavoriteBorder, MdSunny, MdWaterDrop, MdAir } from "react-icons/md";
+import Image from "next/image";
 
 interface EncyclopediaCardProps {
   plant: Plant;
@@ -18,7 +19,14 @@ export default function EncyclopediaCard({ plant }: EncyclopediaCardProps) {
 
   return (
     <div className="bento-card rounded-xl overflow-hidden border border-[#e6f4f2] dark:border-[#354545] group hover:shadow-lg transition-all duration-300">
-      <div className="h-56 bg-cover bg-center relative" style={{ backgroundImage: `url(${plant.images[0]})` }}>
+      <div className="h-56 relative">
+        <Image
+          src={plant.images[0]}
+          alt={plant.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
         <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/50 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-primary uppercase tracking-wide">
           Tropical
         </div>

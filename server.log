@@ -1,0 +1,15 @@
+
+> plant-care-pro@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+✓ Ready in 1047ms
+○ Compiling /encyclopedia ...
+ GET /encyclopedia 200 in 5.8s (compile: 4.9s, render: 849ms)
+ GET /jungle 200 in 747ms (compile: 651ms, render: 96ms)
+ GET /encyclopedia 200 in 54ms (compile: 4ms, render: 51ms)
+ GET /jungle 200 in 53ms (compile: 3ms, render: 49ms)

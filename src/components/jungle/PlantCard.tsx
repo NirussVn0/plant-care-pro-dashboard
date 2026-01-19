@@ -4,6 +4,7 @@ import { Plant } from "@/models/Plant";
 import { MdEdit, MdSunny, MdWaterDrop } from "react-icons/md";
 import { fadeInUp } from "@/lib/animations";
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 
 interface PlantCardProps {
   plant: Plant;
@@ -37,15 +38,19 @@ export default function PlantCard({ plant, staggerIndex = 0 }: PlantCardProps) {
       ref={cardRef}
       className="bento-card rounded-2xl overflow-hidden border border-[#e6f4f2] dark:border-[#354545] group hover:shadow-xl transition-all duration-300 flex flex-col opacity-0"
     >
-      <div
-        className="h-64 bg-cover bg-center relative overflow-hidden"
-        style={{ backgroundImage: `url(${plant.images[0]})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-primary uppercase tracking-wider shadow-sm">
+      <div className="h-64 relative overflow-hidden">
+        <Image
+          src={plant.images[0]}
+          alt={plant.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+        <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-primary uppercase tracking-wider shadow-sm z-10">
           {plant.room}
         </div>
-        <button className="absolute bottom-3 right-3 p-2 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+        <button className="absolute bottom-3 right-3 p-2 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 z-10">
           <MdEdit className="text-sm" />
         </button>
       </div>
