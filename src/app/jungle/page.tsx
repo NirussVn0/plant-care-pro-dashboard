@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import FilterBar from "@/components/jungle/FilterBar";
 import PlantCard from "@/components/jungle/PlantCard";
 import ServiceFactory from "@/services/ServiceFactory";
@@ -9,18 +9,14 @@ import { MdAdd } from "react-icons/md";
 
 export default function MyJunglePage() {
   const [allPlants, setAllPlants] = useState<Plant[]>([]);
-  const [filteredPlants, setFilteredPlants] = useState<Plant[]>([]);
   const [query, setQuery] = useState("");
   const [filterRoom, setFilterRoom] = useState("All Rooms");
 
   useEffect(() => {
-    ServiceFactory.getPlantService().getAllPlants().then((data) => {
-      setAllPlants(data);
-      setFilteredPlants(data);
-    });
+    ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
   }, []);
 
-  useEffect(() => {
+  const filteredPlants = useMemo(() => {
     let result = allPlants;
 
     if (filterRoom !== "All Rooms") {
@@ -35,7 +31,7 @@ export default function MyJunglePage() {
       );
     }
 
-    setFilteredPlants(result);
+    return result;
   }, [query, filterRoom, allPlants]);
 
   return (
@@ -52,7 +48,6 @@ export default function MyJunglePage() {
           <PlantCard key={plant.id} plant={plant} staggerIndex={index} />
         ))}
 
-        {/* Add New Plant Card (Placeholder) */}
         <article className="bento-card rounded-2xl overflow-hidden border-2 border-dashed border-[#e6f4f2] dark:border-[#354545] group hover:border-primary/50 transition-all duration-300 flex flex-col items-center justify-center p-8 cursor-pointer min-h-[350px]">
           <div className="size-16 rounded-full bg-[#e6f4f2] dark:bg-[#2d3a3a] flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors mb-4">
             <MdAdd className="text-3xl" />

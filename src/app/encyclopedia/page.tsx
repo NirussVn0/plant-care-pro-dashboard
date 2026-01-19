@@ -5,7 +5,7 @@ import EncyclopediaFilters from "@/components/encyclopedia/EncyclopediaFilters";
 import EncyclopediaCard from "@/components/encyclopedia/EncyclopediaCard";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Plant } from "@/models/Plant";
-import { MdSearch, MdArrowForward } from "react-icons/md";
+import { MdSearch } from "react-icons/md";
 
 export default function EncyclopediaPage() {
   const [plants, setPlants] = useState<Plant[]>([]);
