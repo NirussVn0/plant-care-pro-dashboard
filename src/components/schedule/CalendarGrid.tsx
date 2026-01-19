@@ -6,13 +6,14 @@ import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 interface CalendarProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  taskDates: Set<string>;
 }
 
 /**
  * Calendar grid component for the Schedule page.
  * Displays monthly view with date selection and task indicators.
  */
-export default function CalendarGrid({ selectedDate, onSelectDate }: CalendarProps) {
+export default function CalendarGrid({ selectedDate, onSelectDate, taskDates }: CalendarProps) {
   const currentMonth = selectedDate.getMonth();
   const currentYear = selectedDate.getFullYear();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -48,8 +49,9 @@ export default function CalendarGrid({ selectedDate, onSelectDate }: CalendarPro
     return day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
   };
 
-  const hasTaskIndicators = (day: number): boolean => {
-    return day % 3 === 0;
+  const hasTask = (day: number): boolean => {
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return taskDates.has(dateStr);
   };
 
   return (
@@ -58,23 +60,23 @@ export default function CalendarGrid({ selectedDate, onSelectDate }: CalendarPro
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-bold font-display">{monthNames[currentMonth]} {currentYear}</h2>
           <div className="flex gap-1">
-            <button 
+            <button
               onClick={handlePrevMonth}
-              className="p-1 hover:bg-[#e6f4f2] dark:hover:bg-[#354545] rounded transition-colors text-primary"
+              className="p-2 hover:bg-[#e6f4f2] dark:hover:bg-[#354545] rounded-lg transition-colors text-primary"
             >
               <MdChevronLeft size={24} />
             </button>
-            <button 
+            <button
               onClick={handleNextMonth}
-              className="p-1 hover:bg-[#e6f4f2] dark:hover:bg-[#354545] rounded transition-colors text-primary"
+              className="p-2 hover:bg-[#e6f4f2] dark:hover:bg-[#354545] rounded-lg transition-colors text-primary"
             >
               <MdChevronRight size={24} />
             </button>
           </div>
         </div>
-        <button 
+        <button
           onClick={handleToday}
-          className="px-4 py-1.5 border border-[#e6f4f2] dark:border-[#354545] text-primary hover:bg-[#e6f4f2] dark:hover:bg-[#354545] rounded-lg text-sm font-bold transition-colors"
+          className="px-4 py-2 border border-[#e6f4f2] dark:border-[#354545] text-primary hover:bg-primary hover:text-white rounded-lg text-sm font-bold transition-colors"
         >
           Today
         </button>
@@ -89,22 +91,24 @@ export default function CalendarGrid({ selectedDate, onSelectDate }: CalendarPro
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-2 lg:gap-4">
+        <div className="grid grid-cols-7 gap-2 lg:gap-3">
           {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[100px] rounded-lg p-2 bg-background-light/30 dark:bg-background-dark/30" />
+            <div key={`empty-${i}`} className="min-h-[80px] rounded-lg p-2 bg-background-light/30 dark:bg-background-dark/30" />
           ))}
 
           {days.map((day) => {
             const isSelected = isDateSelected(day);
             const isTodayDate = isToday(day);
+            const dayHasTask = hasTask(day);
+
             return (
               <div
                 key={day}
                 onClick={() => onSelectDate(new Date(currentYear, currentMonth, day))}
                 className={clsx(
-                  "min-h-[100px] rounded-lg p-2 relative cursor-pointer transition-all group border",
+                  "min-h-[80px] rounded-lg p-2 relative cursor-pointer transition-all group border",
                   isSelected
-                    ? "border-2 border-primary bg-primary/5 dark:bg-primary/20 shadow-md transform scale-[1.02]"
+                    ? "border-2 border-primary bg-primary/5 dark:bg-primary/20 shadow-md"
                     : isTodayDate
                       ? "border-2 border-primary/50 bg-primary/10 dark:bg-primary/10"
                       : "border-[#e6f4f2] dark:border-[#354545] hover:border-primary bg-white dark:bg-[#2a3434]"
@@ -112,13 +116,13 @@ export default function CalendarGrid({ selectedDate, onSelectDate }: CalendarPro
               >
                 <span className={clsx(
                   "font-bold text-sm",
-                  isSelected ? "text-primary" : isTodayDate ? "text-primary" : "text-text-main/60 dark:text-text-inverse/60 group-hover:text-primary"
+                  isSelected || isTodayDate ? "text-primary" : "text-text-main/60 dark:text-text-inverse/60 group-hover:text-primary"
                 )}>
                   {day}
                 </span>
 
-                {hasTaskIndicators(day) && (
-                  <div className="flex gap-1 mt-2 flex-wrap content-start">
+                {dayHasTask && (
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
                     <div className="size-2 rounded-full bg-blue-400 shadow-sm" />
                   </div>
                 )}

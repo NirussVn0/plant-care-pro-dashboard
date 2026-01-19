@@ -11,9 +11,21 @@ interface AppShellProps {
 
 /**
  * Main application shell that handles authenticated vs landing view.
+ * Shows loading skeleton during auth hydration.
  */
 export default function AppShell({ children }: AppShellProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+          <p className="text-primary font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <LandingPage />;

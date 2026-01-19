@@ -1,18 +1,19 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
 
 interface User {
   name: string;
+  email: string;
   avatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (name: string) => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => void;
   logout: () => void;
-  initializeAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,25 +34,35 @@ interface AuthProviderProps {
 }
 
 /**
- * Retrieves stored user from localStorage.
- */
-function getStoredUser(): User | null {
-  if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("user");
-  return stored ? JSON.parse(stored) : null;
-}
-
-/**
  * Authentication provider for demo login functionality.
- * Persists user session to localStorage.
+ * Persists user session to localStorage with SSR-safe hydration.
  */
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(() => getStoredUser());
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback((name: string) => {
+  useEffect(() => {
+    // Hydration from localStorage - this is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUser(JSON.parse(stored));
+      } catch {
+        localStorage.removeItem("user");
+      }
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(false);
+  }, []);
+
+  const login = useCallback((email: string, _password: string) => {
+    const name = email.split("@")[0];
     const newUser: User = {
       name,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+      email,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
     };
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
@@ -62,15 +73,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem("user");
   }, []);
 
-  const initializeAuth = useCallback(() => {
-    const stored = getStoredUser();
-    if (stored) {
-      setUser(stored);
-    }
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, initializeAuth }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

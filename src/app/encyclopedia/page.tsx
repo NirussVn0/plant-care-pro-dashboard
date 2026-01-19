@@ -1,19 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import EncyclopediaFilters from "@/components/encyclopedia/EncyclopediaFilters";
 import EncyclopediaCard from "@/components/encyclopedia/EncyclopediaCard";
 import ServiceFactory from "@/services/ServiceFactory";
-import { Plant } from "@/models/Plant";
+import { Plant, PlantCategory, PlantDifficulty } from "@/models/Plant";
 import { MdSearch } from "react-icons/md";
 
 export default function EncyclopediaPage() {
-  const [plants, setPlants] = useState<Plant[]>([]);
+  const [allPlants, setAllPlants] = useState<Plant[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<PlantCategory[]>([]);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<PlantDifficulty | null>(null);
 
   useEffect(() => {
-    // For now, reuse regular plant service. In real app, might fetch "all species".
-    ServiceFactory.getPlantService().getAllPlants().then(setPlants);
+    ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
   }, []);
+
+  const filteredPlants = useMemo(() => {
+    let result = allPlants;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (plant) =>
+          plant.name.toLowerCase().includes(query) ||
+          plant.scientificName.toLowerCase().includes(query)
+      );
+    }
+
+    if (selectedCategories.length > 0) {
+      result = result.filter((plant) => selectedCategories.includes(plant.category));
+    }
+
+    if (selectedDifficulty) {
+      result = result.filter((plant) => plant.difficulty === selectedDifficulty);
+    }
+
+    return result;
+  }, [allPlants, searchQuery, selectedCategories, selectedDifficulty]);
+
+  const handleReset = () => {
+    setSearchQuery("");
+    setSelectedCategories([]);
+    setSelectedDifficulty(null);
+  };
 
   return (
     <div className="min-h-full">
@@ -31,8 +62,10 @@ export default function EncyclopediaPage() {
             <div className="relative w-full lg:w-96">
               <input
                 className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#2a3434] border border-[#e6f4f2] dark:border-[#354545] rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
-                placeholder="Search by name, scientific name, or type..."
+                placeholder="Search by name or scientific name..."
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <MdSearch className="absolute left-3 top-3.5 text-primary text-xl" />
             </div>
@@ -41,17 +74,16 @@ export default function EncyclopediaPage() {
 
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-bold text-primary uppercase tracking-wider mr-2">
-            Popular:
+            Quick Filters:
           </span>
-          {[
-            "Low Light",
-            "Pet Friendly",
-            "Air Purifying",
-            "Beginner Friendly",
-            "Drought Tolerant",
-          ].map((tag) => (
+          {["Easy", "Pet Friendly", "Tropical", "Succulents"].map((tag) => (
             <button
               key={tag}
+              onClick={() => {
+                if (tag === "Easy") setSelectedDifficulty("Easy");
+                else if (tag === "Tropical") setSelectedCategories(["Tropical"]);
+                else if (tag === "Succulents") setSelectedCategories(["Succulents"]);
+              }}
               className="px-3 py-1.5 bg-white dark:bg-[#2a3434] border border-[#e6f4f2] dark:border-[#354545] rounded-full text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
             >
               {tag}
@@ -61,27 +93,37 @@ export default function EncyclopediaPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <EncyclopediaFilters />
+        <EncyclopediaFilters
+          selectedCategories={selectedCategories}
+          selectedDifficulty={selectedDifficulty}
+          onCategoryChange={setSelectedCategories}
+          onDifficultyChange={setSelectedDifficulty}
+          onReset={handleReset}
+        />
 
         <div className="lg:col-span-9">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {plants.map((plant) => (
-              <EncyclopediaCard key={plant.id} plant={plant} />
-            ))}
-          </div>
+          {filteredPlants.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-text-muted text-lg">No plants found matching your criteria.</p>
+              <button
+                onClick={handleReset}
+                className="mt-4 text-primary font-bold hover:underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredPlants.map((plant) => (
+                <EncyclopediaCard key={plant.id} plant={plant} />
+              ))}
+            </div>
+          )}
 
           <div className="mt-12 flex justify-center">
-            {/* Pagination Mock */}
-            <nav className="flex items-center gap-2">
-                <button className="size-10 flex items-center justify-center rounded-lg border border-[#e6f4f2] dark:border-[#354545] hover:bg-primary hover:text-white transition-colors disabled:opacity-50">
-                    Prev
-                </button>
-                <button className="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold">1</button>
-                <button className="size-10 flex items-center justify-center rounded-lg border border-[#e6f4f2] dark:border-[#354545] hover:bg-primary hover:text-white transition-colors font-medium">2</button>
-                <button className="size-10 flex items-center justify-center rounded-lg border border-[#e6f4f2] dark:border-[#354545] hover:bg-primary hover:text-white transition-colors disabled:opacity-50">
-                    Next
-                </button>
-            </nav>
+            <p className="text-sm text-text-muted">
+              Showing {filteredPlants.length} of {allPlants.length} plants
+            </p>
           </div>
         </div>
       </div>

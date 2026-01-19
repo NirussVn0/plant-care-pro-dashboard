@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useCallback, useLayoutEffect, useMemo } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useMemo } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -28,42 +28,44 @@ interface ThemeProviderProps {
 }
 
 /**
- * Gets stored theme from localStorage.
- */
-function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "system";
-  return (localStorage.getItem("theme") as Theme) || "system";
-}
-
-/**
- * Resolves the actual theme based on preference.
- */
-function resolveTheme(theme: Theme): "light" | "dark" {
-  if (theme === "system") {
-    if (typeof window === "undefined") return "light";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  return theme;
-}
-
-/**
  * Theme provider component for light/dark mode management.
- * Persists theme preference to localStorage.
+ * Persists theme preference to localStorage with SSR-safe hydration.
  */
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
+  const [theme, setThemeState] = useState<Theme>("system");
+  const [mounted, setMounted] = useState(false);
+  const [systemPreference, setSystemPreference] = useState<"light" | "dark">("light");
 
-  const resolvedTheme = useMemo(() => resolveTheme(theme), [theme]);
+  useEffect(() => {
+    // Hydration from localStorage - this is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const stored = localStorage.getItem("theme") as Theme | null;
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setThemeState(stored);
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSystemPreference(
+      window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    );
+  }, []);
 
-  useLayoutEffect(() => {
+  const resolvedTheme = useMemo((): "light" | "dark" => {
+    if (!mounted) return "light";
+    return theme === "system" ? systemPreference : theme;
+  }, [theme, mounted, systemPreference]);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const root = document.documentElement;
-
     if (resolvedTheme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
-  }, [resolvedTheme]);
+  }, [resolvedTheme, mounted]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
