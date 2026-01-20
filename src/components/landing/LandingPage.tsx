@@ -11,8 +11,11 @@ import {
   MdWaterDrop,
   MdNotifications,
   MdCheckCircle,
+  MdLightMode,
+  MdDarkMode,
 } from "react-icons/md";
 import AuthModal from "@/components/auth/AuthModal";
+import { useTheme } from "@/contexts/ThemeContext";
 import { animationService } from "@/services/animation/AnimationService";
 import { useScrollAnimation, useStaggerAnimation } from "@/hooks/useScrollAnimation";
 
@@ -76,6 +79,7 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [mounted, setMounted] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   // Refs for hero animations
   const heroBadgeRef = useRef<HTMLDivElement>(null);
@@ -182,7 +186,19 @@ export default function LandingPage() {
           <IoLeaf size={32} />
           <h2 className="text-xl font-bold leading-tight tracking-tight">PlantCare Pro</h2>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] text-primary hover:bg-[#e6f4f2] dark:hover:bg-[#354545] transition-all hover:scale-105 active:scale-95"
+            aria-label="Toggle theme"
+          >
+            {mounted && resolvedTheme === "dark" ? (
+              <MdLightMode size={20} />
+            ) : (
+              <MdDarkMode size={20} />
+            )}
+          </button>
           <button
             onClick={openLogin}
             className="hidden md:block text-sm font-bold hover:text-primary transition-colors"
