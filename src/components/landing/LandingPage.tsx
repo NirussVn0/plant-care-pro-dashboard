@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoLeaf } from "react-icons/io5";
 import {
   MdArrowForward,
@@ -13,6 +13,8 @@ import {
   MdCheckCircle,
 } from "react-icons/md";
 import AuthModal from "@/components/auth/AuthModal";
+import { animationService } from "@/services/animation/AnimationService";
+import { useScrollAnimation, useStaggerAnimation } from "@/hooks/useScrollAnimation";
 
 const FEATURES = [
   {
@@ -67,12 +69,100 @@ const TESTIMONIALS = [
 ];
 
 /**
- * Full marketing landing page for unauthenticated users.
- * Matches the reference design with hero, features, phone mockups, testimonials.
+ * Full marketing landing page with anime.js animations.
+ * Features: Hero entrance, floating cards, scroll reveals, counter animations.
  */
 export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [mounted, setMounted] = useState(false);
+
+  // Refs for hero animations
+  const heroBadgeRef = useRef<HTMLDivElement>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const heroDescRef = useRef<HTMLParagraphElement>(null);
+  const heroButtonsRef = useRef<HTMLDivElement>(null);
+  const heroSocialRef = useRef<HTMLDivElement>(null);
+  const heroImageRef = useRef<HTMLDivElement>(null);
+  const floatingCard1Ref = useRef<HTMLDivElement>(null);
+  const floatingCard2Ref = useRef<HTMLDivElement>(null);
+
+  // Refs for counter animations
+  const plantsSavedRef = useRef<HTMLParagraphElement>(null);
+  const dailyUsersRef = useRef<HTMLParagraphElement>(null);
+
+  // Scroll animation hooks
+  const { ref: featuresRef } = useStaggerAnimation({ stagger: 150, delay: 100 });
+  const { ref: testimonialsRef } = useStaggerAnimation({ stagger: 200, delay: 100 });
+  const { ref: missionRef } = useScrollAnimation({ type: "fadeInUp", delay: 0 });
+  const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation({ type: "scaleIn", delay: 200 });
+
+  // Hero entrance animations on mount
+  useEffect(() => {
+    // Hydration pattern - intentional state update
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    
+    const runHeroAnimations = () => {
+      // Badge
+      if (heroBadgeRef.current) {
+        animationService.fadeInUp(heroBadgeRef.current, { delay: 0, duration: 600 });
+      }
+      // Title
+      if (heroTitleRef.current) {
+        animationService.fadeInUp(heroTitleRef.current, { delay: 150, duration: 800 });
+      }
+      // Description
+      if (heroDescRef.current) {
+        animationService.fadeInUp(heroDescRef.current, { delay: 300, duration: 700 });
+      }
+      // Buttons
+      if (heroButtonsRef.current) {
+        animationService.fadeInUp(heroButtonsRef.current, { delay: 450, duration: 700 });
+      }
+      // Social proof
+      if (heroSocialRef.current) {
+        animationService.fadeInUp(heroSocialRef.current, { delay: 600, duration: 700 });
+      }
+      // Hero image
+      if (heroImageRef.current) {
+        animationService.scaleIn(heroImageRef.current, { delay: 300, duration: 1000 });
+      }
+      // Floating cards with continuous animation
+      if (floatingCard1Ref.current) {
+        animationService.fadeInLeft(floatingCard1Ref.current, { delay: 800, duration: 600 });
+        setTimeout(() => {
+          if (floatingCard1Ref.current) {
+            animationService.float(floatingCard1Ref.current);
+          }
+        }, 1400);
+      }
+      if (floatingCard2Ref.current) {
+        animationService.fadeInRight(floatingCard2Ref.current, { delay: 1000, duration: 600 });
+        setTimeout(() => {
+          if (floatingCard2Ref.current) {
+            animationService.float(floatingCard2Ref.current, { duration: 3000 });
+          }
+        }, 1600);
+      }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(runHeroAnimations, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Counter animations when stats section becomes visible
+  useEffect(() => {
+    if (statsVisible && mounted) {
+      if (plantsSavedRef.current) {
+        animationService.counterAnimation(plantsSavedRef.current, 500000, { duration: 2500 });
+      }
+      if (dailyUsersRef.current) {
+        animationService.counterAnimation(dailyUsersRef.current, 10000, { duration: 2000, delay: 300 });
+      }
+    }
+  }, [statsVisible, mounted]);
 
   const openLogin = () => {
     setAuthMode("login");
@@ -101,7 +191,7 @@ export default function LandingPage() {
           </button>
           <button
             onClick={openSignup}
-            className="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-full hover:bg-[#005f52] transition-all shadow-lg shadow-primary/20"
+            className="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-full hover:bg-[#005f52] transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
           >
             Get Started
           </button>
@@ -112,14 +202,20 @@ export default function LandingPage() {
       <header className="relative px-6 lg:px-20 py-12 lg:py-20">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="space-y-8 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] shadow-sm">
+            <div
+              ref={heroBadgeRef}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] shadow-sm opacity-0"
+            >
               <span className="size-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 #1 Plant Care App
               </span>
             </div>
 
-            <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight">
+            <h1
+              ref={heroTitleRef}
+              className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight opacity-0"
+            >
               Keep your <br />
               <span className="text-primary relative inline-block">
                 indoor jungle
@@ -139,25 +235,31 @@ export default function LandingPage() {
               <br /> thriving.
             </h1>
 
-            <p className="text-lg text-text-main/70 dark:text-text-inverse/70 max-w-lg leading-relaxed">
+            <p
+              ref={heroDescRef}
+              className="text-lg text-text-main/70 dark:text-text-inverse/70 max-w-lg leading-relaxed opacity-0"
+            >
               The all-in-one dashboard for modern plant parents. Schedule watering, track growth,
               and get expert care guides in one beautiful place.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div
+              ref={heroButtonsRef}
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-4 opacity-0"
+            >
               <button
                 onClick={openSignup}
-                className="px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-[#005f52] transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
+                className="px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-[#005f52] transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group hover:scale-105 active:scale-95"
               >
                 To the Garden
                 <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="px-8 py-4 bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] font-bold rounded-full hover:bg-gray-50 dark:hover:bg-[#354545] transition-all">
+              <button className="px-8 py-4 bg-white dark:bg-[#2d3a3a] border border-[#e6f4f2] dark:border-[#354545] font-bold rounded-full hover:bg-gray-50 dark:hover:bg-[#354545] transition-all hover:scale-105 active:scale-95">
                 View Demo
               </button>
             </div>
 
-            <div className="flex items-center gap-4 pt-4">
+            <div ref={heroSocialRef} className="flex items-center gap-4 pt-4 opacity-0">
               <div className="flex -space-x-3">
                 <div className="size-10 rounded-full border-2 border-white dark:border-[#222a2a] bg-purple-200 flex items-center justify-center text-purple-700 text-xs font-bold">
                   MJ
@@ -184,7 +286,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero Image */}
-          <div className="relative z-10">
+          <div ref={heroImageRef} className="relative z-10 opacity-0">
             <div className="absolute -z-10 w-72 h-72 bg-primary/20 rounded-full top-0 right-0 blur-[40px] opacity-50" />
             <div className="absolute -z-10 w-72 h-72 bg-sun-yellow/20 rounded-full bottom-0 left-10 blur-[40px] opacity-50" />
 
@@ -205,7 +307,10 @@ export default function LandingPage() {
               </div>
 
               {/* Floating Cards */}
-              <div className="absolute -left-8 top-12 bg-white dark:bg-[#2a3434] backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50 animate-bounce">
+              <div
+                ref={floatingCard1Ref}
+                className="absolute -left-8 top-12 bg-white dark:bg-[#2a3434] backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50 opacity-0"
+              >
                 <div className="flex items-center gap-3">
                   <div className="size-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
                     <MdWaterDrop size={20} />
@@ -220,7 +325,10 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="absolute -right-4 bottom-20 bg-white dark:bg-[#2a3434] backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50 max-w-[200px]">
+              <div
+                ref={floatingCard2Ref}
+                className="absolute -right-4 bottom-20 bg-white dark:bg-[#2a3434] backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50 max-w-[200px] opacity-0"
+              >
                 <div className="flex items-start gap-3">
                   <div className="size-8 rounded-full bg-accent-warm/20 flex items-center justify-center text-accent-warm shrink-0">
                     <MdNotifications size={16} />
@@ -249,14 +357,17 @@ export default function LandingPage() {
             the enjoying.
           </p>
         </div>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div
+          ref={featuresRef}
+          className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8"
+        >
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="p-8 rounded-3xl bg-background-light dark:bg-background-dark/50 hover:bg-white dark:hover:bg-[#2d3a3a] transition-colors border border-transparent hover:border-[#e6f4f2] dark:hover:border-[#354545] group"
+              className="p-8 rounded-3xl bg-background-light dark:bg-background-dark/50 hover:bg-white dark:hover:bg-[#2d3a3a] transition-all duration-300 border border-transparent hover:border-[#e6f4f2] dark:hover:border-[#354545] group opacity-0 hover:shadow-xl hover:-translate-y-2"
             >
               <div
-                className={`size-14 rounded-2xl ${feature.color} text-white flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}
+                className={`size-14 rounded-2xl ${feature.color} text-white flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}
               >
                 <feature.icon size={28} />
               </div>
@@ -278,11 +389,14 @@ export default function LandingPage() {
               Join thousands of happy plant parents who have transformed their homes.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            ref={testimonialsRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {TESTIMONIALS.map((testimonial) => (
               <div
                 key={testimonial.name}
-                className={`p-8 bg-background-light dark:bg-[#2d3a3a] rounded-3xl relative ${
+                className={`p-8 bg-background-light dark:bg-[#2d3a3a] rounded-3xl relative opacity-0 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 ${
                   testimonial.featured
                     ? "mt-0 md:-mt-4 shadow-xl border border-primary/10"
                     : ""
@@ -318,7 +432,10 @@ export default function LandingPage() {
       {/* Mission Section */}
       <section className="px-6 lg:px-20 py-20 bg-primary dark:bg-[#005f52] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+        <div
+          ref={missionRef}
+          className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 opacity-0"
+        >
           <div className="space-y-6">
             <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border border-white/20">
               Our Mission
@@ -331,20 +448,33 @@ export default function LandingPage() {
               plants reconnect us to the rhythm of nature. Our goal is to make plant care
               accessible, successful, and joyful for everyone.
             </p>
-            <button className="px-6 py-3 bg-sun-yellow text-[#0c1d1a] font-bold rounded-full hover:bg-white transition-colors mt-4">
+            <button className="px-6 py-3 bg-sun-yellow text-[#0c1d1a] font-bold rounded-full hover:bg-white transition-all hover:scale-105 active:scale-95 mt-4">
               Read Our Story
             </button>
           </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20">
+          <div
+            ref={statsRef}
+            className="bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20 opacity-0"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
               <div>
-                <p className="text-5xl lg:text-6xl font-extrabold text-sun-yellow mb-2">500k+</p>
+                <p
+                  ref={plantsSavedRef}
+                  className="text-5xl lg:text-6xl font-extrabold text-sun-yellow mb-2"
+                >
+                  0
+                </p>
                 <p className="text-sm font-bold uppercase tracking-widest opacity-80">
                   Plants Saved
                 </p>
               </div>
               <div>
-                <p className="text-5xl lg:text-6xl font-extrabold text-accent-warm mb-2">10k+</p>
+                <p
+                  ref={dailyUsersRef}
+                  className="text-5xl lg:text-6xl font-extrabold text-accent-warm mb-2"
+                >
+                  0
+                </p>
                 <p className="text-sm font-bold uppercase tracking-widest opacity-80">
                   Daily Users
                 </p>
@@ -421,11 +551,11 @@ export default function LandingPage() {
               <p className="text-sm mb-4">Get the latest plant tips and product updates.</p>
               <form className="flex flex-col gap-3">
                 <input
-                  className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-white placeholder-white/40"
+                  className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm text-white placeholder-white/40 transition-colors"
                   placeholder="Enter your email"
                   type="email"
                 />
-                <button className="px-4 py-3 bg-primary hover:bg-[#005f52] text-white font-bold rounded-xl text-sm transition-colors">
+                <button className="px-4 py-3 bg-primary hover:bg-[#005f52] text-white font-bold rounded-xl text-sm transition-all hover:scale-105 active:scale-95">
                   Subscribe
                 </button>
               </form>
