@@ -7,9 +7,9 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 1047ms
-○ Compiling /encyclopedia ...
- GET /encyclopedia 200 in 5.8s (compile: 4.9s, render: 849ms)
- GET /jungle 200 in 747ms (compile: 651ms, render: 96ms)
- GET /encyclopedia 200 in 54ms (compile: 4ms, render: 51ms)
- GET /jungle 200 in 53ms (compile: 3ms, render: 49ms)
+✓ Ready in 1072ms
+○ Compiling / ...
+ GET / 200 in 7.8s (compile: 6.5s, render: 1289ms)
+ GET / 200 in 111ms (compile: 6ms, render: 106ms)
+ GET / 200 in 103ms (compile: 6ms, render: 98ms)
+ GET / 200 in 95ms (compile: 3ms, render: 92ms)

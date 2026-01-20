@@ -5,6 +5,10 @@ import { IoLeaf, IoClose } from "react-icons/io5";
 import { MdVisibility, MdVisibilityOff, MdArrowForward } from "react-icons/md";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Security constants
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
 interface AuthModalProps {
   mode: "login" | "signup";
   onClose: () => void;
@@ -31,8 +35,8 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProp
       return;
     }
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email");
+    if (!EMAIL_REGEX.test(email)) {
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -41,9 +45,18 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProp
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
+    // Enforce strong password policy for new accounts
+    if (mode === "signup") {
+      if (!PASSWORD_REGEX.test(password)) {
+        setError("Password must be at least 8 characters and include uppercase, lowercase, and a number");
+        return;
+      }
+    } else {
+      // Basic length check for login
+      if (password.length < 1) {
+        setError("Please enter your password");
+        return;
+      }
     }
 
     if (mode === "signup" && !name.trim()) {
@@ -117,6 +130,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProp
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
+                  maxLength={50}
                   className="w-full px-4 py-3 rounded-xl border border-[#e6f4f2] dark:border-[#354545] bg-[#fcfbf9] dark:bg-[#222a2a] focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-main dark:text-text-inverse placeholder:text-text-muted/50"
                   autoComplete="name"
                 />
@@ -136,6 +150,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProp
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                maxLength={100}
                 className="w-full px-4 py-3 rounded-xl border border-[#e6f4f2] dark:border-[#354545] bg-[#fcfbf9] dark:bg-[#222a2a] focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-main dark:text-text-inverse placeholder:text-text-muted/50"
                 autoComplete="email"
               />
@@ -155,6 +170,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProp
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  maxLength={128}
                   className="w-full px-4 py-3 pr-12 rounded-xl border border-[#e6f4f2] dark:border-[#354545] bg-[#fcfbf9] dark:bg-[#222a2a] focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-main dark:text-text-inverse placeholder:text-text-muted/50"
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
                 />
