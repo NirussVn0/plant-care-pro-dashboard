@@ -4,7 +4,9 @@ import "./globals.css";
 import { clsx } from "clsx";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import AppShell from "@/components/layout/AppShell";
+import ToastContainer from "@/components/ui/ToastContainer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +34,10 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <AppShell>{children}</AppShell>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+              <ToastContainer />
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

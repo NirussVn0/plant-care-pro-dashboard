@@ -6,22 +6,32 @@ import EncyclopediaCard from "@/components/encyclopedia/EncyclopediaCard";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Plant, PlantCategory, PlantDifficulty } from "@/models/Plant";
 import { MdSearch } from "react-icons/md";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function EncyclopediaPage() {
   const [allPlants, setAllPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategories, setSelectedCategories] = useState<PlantCategory[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<PlantDifficulty | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
-    ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
-  }, []);
+    ServiceFactory.getPlantService()
+      .getAllPlants()
+      .then(setAllPlants)
+      .catch((err) => {
+        console.error("Failed to fetch plants:", err);
+        showToast("Failed to load plants. Please try again.", "error");
+      });
+  }, [showToast]);
 
   const filteredPlants = useMemo(() => {
     let result = allPlants;
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       result = result.filter(
         (plant) =>
           plant.name.toLowerCase().includes(query) ||
@@ -38,7 +48,7 @@ export default function EncyclopediaPage() {
     }
 
     return result;
-  }, [allPlants, searchQuery, selectedCategories, selectedDifficulty]);
+  }, [allPlants, debouncedSearchQuery, selectedCategories, selectedDifficulty]);
 
   const handleReset = () => {
     setSearchQuery("");
