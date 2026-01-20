@@ -6,6 +6,7 @@ import DayDetails from "@/components/schedule/DayDetails";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Task } from "@/models/Task";
 import { animationService } from "@/services/animation/AnimationService";
+import { formatLocalDate } from "@/services/task/TaskService";
 import { MdAdd } from "react-icons/md";
 
 export default function SchedulePage() {
@@ -44,18 +45,22 @@ export default function SchedulePage() {
     }
   }, []);
 
+  // Use formatLocalDate for proper timezone handling
   const taskDates = useMemo(() => {
     const dates = new Set<string>();
     allTasks.forEach((task) => {
-      dates.add(task.date.toISOString().split("T")[0]);
+      dates.add(formatLocalDate(task.date));
     });
     return dates;
   }, [allTasks]);
 
+  // Sort tasks: incomplete first, completed last
   const selectedDateTasks = useMemo(() => {
-    const dateStr = selectedDate.toISOString().split("T")[0];
-    return allTasks.filter((task) => task.date.toISOString().split("T")[0] === dateStr);
+    const dateStr = formatLocalDate(selectedDate);
+    const tasks = allTasks.filter((task) => formatLocalDate(task.date) === dateStr);
+    return tasks.sort((a, b) => Number(a.completed) - Number(b.completed));
   }, [selectedDate, allTasks]);
+
 
   return (
     <div className="min-h-full">

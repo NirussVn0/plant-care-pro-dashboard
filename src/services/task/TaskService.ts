@@ -1,6 +1,52 @@
 import { Task } from "@/models/Task";
 
 /**
+ * Mock data store for tasks.
+ * Centralized location for all demo/mock data.
+ * This simulates API responses until backend is ready.
+ */
+const MOCK_TASKS: Task[] = [
+  // Today's tasks (using relative dates)
+  { id: "1", plantId: "1", type: "WATER", date: getRelativeDate(0), completed: false, note: "Morning watering" },
+  { id: "2", plantId: "2", type: "FERTILIZE", date: getRelativeDate(0), completed: false },
+  { id: "3", plantId: "4", type: "MIST", date: getRelativeDate(0), completed: true },
+  
+  // Tomorrow's tasks
+  { id: "4", plantId: "1", type: "WATER", date: getRelativeDate(1), completed: false, note: "Needs approx 500ml" },
+  { id: "5", plantId: "5", type: "MIST", date: getRelativeDate(1), completed: false, note: "Humidity is low (45%)" },
+  { id: "6", plantId: "2", type: "FERTILIZE", date: getRelativeDate(1), completed: false, note: "Monthly fertilization" },
+  
+  // Future tasks (relative days from now)
+  { id: "7", plantId: "3", type: "WATER", date: getRelativeDate(3), completed: false },
+  { id: "8", plantId: "6", type: "MIST", date: getRelativeDate(5), completed: false },
+  { id: "9", plantId: "7", type: "WATER", date: getRelativeDate(7), completed: false },
+  { id: "10", plantId: "8", type: "FERTILIZE", date: getRelativeDate(10), completed: false },
+  { id: "11", plantId: "1", type: "WATER", date: getRelativeDate(14), completed: false },
+  { id: "12", plantId: "2", type: "MIST", date: getRelativeDate(18), completed: false },
+];
+
+/**
+ * Helper to get a date relative to today (local timezone safe).
+ */
+function getRelativeDate(daysFromNow: number): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0); // Reset to midnight local time
+  date.setDate(date.getDate() + daysFromNow);
+  return date;
+}
+
+/**
+ * Formats a Date to YYYY-MM-DD string using local timezone.
+ * This is the canonical date format for comparisons.
+ */
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Interface for Task Service operations.
  * Defines contract for task scheduling and retrieval.
  */
@@ -8,53 +54,45 @@ export interface ITaskService {
   getDailyTasks(): Promise<Task[]>;
   getTasksByDate(date: Date): Promise<Task[]>;
   getAllTasks(): Promise<Task[]>;
-  getTaskDates(): Promise<string[]>;
+  getTaskDates(): Promise<Set<string>>;
   toggleTaskComplete(taskId: string): Promise<Task | undefined>;
   addTask(task: Omit<Task, "id">): Promise<Task>;
 }
 
-
 /**
  * Service class for managing plant care tasks.
  * Handles task scheduling, filtering by date, and completion tracking.
+ * Simulates async API calls until backend is ready.
  */
 export class TaskService implements ITaskService {
-  private readonly tasks: Task[] = [
-    { id: "1", plantId: "1", type: "WATER", date: new Date(), completed: false },
-    { id: "2", plantId: "2", type: "FERTILIZE", date: new Date(), completed: false },
-    { id: "3", plantId: "4", type: "MIST", date: new Date(), completed: true },
-    { id: "4", plantId: "1", type: "WATER", date: new Date("2026-01-21"), completed: false, note: "Needs approx 500ml" },
-    { id: "5", plantId: "5", type: "MIST", date: new Date("2026-01-21"), completed: false, note: "Humidity is low (45%)" },
-    { id: "6", plantId: "2", type: "FERTILIZE", date: new Date("2026-01-21"), completed: false, note: "Monthly fertilization" },
-    { id: "7", plantId: "3", type: "WATER", date: new Date("2026-01-03"), completed: true },
-    { id: "8", plantId: "6", type: "MIST", date: new Date("2026-01-06"), completed: false },
-    { id: "9", plantId: "7", type: "WATER", date: new Date("2026-01-09"), completed: false },
-    { id: "10", plantId: "8", type: "FERTILIZE", date: new Date("2026-01-12"), completed: false },
-    { id: "11", plantId: "1", type: "WATER", date: new Date("2026-01-15"), completed: false },
-    { id: "12", plantId: "2", type: "MIST", date: new Date("2026-01-18"), completed: false },
-    { id: "13", plantId: "4", type: "WATER", date: new Date("2026-01-24"), completed: false },
-    { id: "14", plantId: "5", type: "FERTILIZE", date: new Date("2026-01-27"), completed: false },
-    { id: "15", plantId: "6", type: "WATER", date: new Date("2026-01-30"), completed: false },
-  ];
+  private tasks: Task[] = [...MOCK_TASKS];
+
+  /**
+   * Simulates API delay for realistic behavior.
+   */
+  private async simulateApiCall<T>(data: T, delayMs = 100): Promise<T> {
+    return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
+  }
 
   async getDailyTasks(): Promise<Task[]> {
     return this.getTasksByDate(new Date());
   }
 
   async getTasksByDate(date: Date): Promise<Task[]> {
-    const targetDateStr = this.formatDateString(date);
-    return Promise.resolve(
-      this.tasks.filter((task) => this.formatDateString(task.date) === targetDateStr)
-    );
+    const targetDateStr = formatLocalDate(date);
+    const tasks = this.tasks.filter((task) => formatLocalDate(task.date) === targetDateStr);
+    // Sort: incomplete first, then completed
+    tasks.sort((a, b) => Number(a.completed) - Number(b.completed));
+    return this.simulateApiCall(tasks);
   }
 
   async getAllTasks(): Promise<Task[]> {
-    return Promise.resolve(this.tasks);
+    return this.simulateApiCall([...this.tasks]);
   }
 
-  async getTaskDates(): Promise<string[]> {
-    const dates = new Set(this.tasks.map((task) => this.formatDateString(task.date)));
-    return Promise.resolve(Array.from(dates));
+  async getTaskDates(): Promise<Set<string>> {
+    const dates = new Set(this.tasks.map((task) => formatLocalDate(task.date)));
+    return this.simulateApiCall(dates);
   }
 
   async toggleTaskComplete(taskId: string): Promise<Task | undefined> {
@@ -62,23 +100,20 @@ export class TaskService implements ITaskService {
     if (task) {
       task.completed = !task.completed;
     }
-    return Promise.resolve(task);
+    return this.simulateApiCall(task ? { ...task } : undefined);
   }
 
   async addTask(taskData: Omit<Task, "id">): Promise<Task> {
     const newTask: Task = {
       ...taskData,
-      id: String(this.tasks.length + 1),
+      id: String(Date.now()), // Use timestamp for unique ID
     };
     this.tasks.push(newTask);
-    return Promise.resolve(newTask);
-  }
-
-  /**
-   * Formats a Date object to YYYY-MM-DD string for comparison.
-   */
-  private formatDateString(date: Date): string {
-    return date.toISOString().split("T")[0];
+    return this.simulateApiCall(newTask);
   }
 }
 
+/**
+ * Export formatLocalDate for use in components.
+ */
+export { formatLocalDate };

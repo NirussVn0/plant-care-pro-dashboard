@@ -61,7 +61,7 @@ export default function DayDetails({ selectedDate, tasks, onCompleteTask, onClos
   };
 
   return (
-    <div className="w-full lg:w-96 bg-white dark:bg-[#2a3434] border-l border-[#e6f4f2] dark:border-[#354545] flex flex-col h-full lg:h-[calc(100vh-65px)] sticky top-[65px] transition-transform duration-300 transform lg:translate-x-0">
+    <div className="w-full bg-white dark:bg-[#2a3434] border border-[#e6f4f2] dark:border-[#354545] rounded-xl flex flex-col h-auto max-h-full overflow-hidden">
       <div className="p-6 border-b border-[#e6f4f2] dark:border-[#354545] flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-text-main dark:text-text-inverse">{format(selectedDate, "EEEE")}</h2>
@@ -82,18 +82,18 @@ export default function DayDetails({ selectedDate, tasks, onCompleteTask, onClos
           tasks.map((task) => {
             const plant = plantDetails[task.plantId];
             return (
-              <div key={task.id} className="flex gap-4 group">
+              <div key={task.id} className={`flex gap-4 group transition-all ${task.completed ? 'opacity-60' : ''}`}>
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-0.5 h-full bg-[#e6f4f2] dark:bg-[#354545] group-last:bg-transparent" />
                 </div>
-                <div className="flex-1 pb-6">
-                  <div className="bg-[#fcfbf9] dark:bg-[#222a2a] p-4 rounded-xl border border-[#e6f4f2] dark:border-[#354545] hover:border-primary transition-colors">
+                <div className="flex-1 pb-4">
+                  <div className={`bg-[#fcfbf9] dark:bg-[#222a2a] p-4 rounded-xl border transition-colors ${task.completed ? 'border-primary/30' : 'border-[#e6f4f2] dark:border-[#354545] hover:border-primary'}`}>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
                         {getTaskIcon(task.type)}
                         <div>
-                          <h4 className="font-bold text-text-main dark:text-text-inverse">{plant?.name || "Loading..."}</h4>
-                          <p className="text-xs text-primary font-bold uppercase tracking-wider">{task.type}</p>
+                          <h4 className={`font-bold text-text-main dark:text-text-inverse ${task.completed ? 'line-through' : ''}`}>{plant?.name || "Loading..."}</h4>
+                          <p className={`text-xs font-bold uppercase tracking-wider ${task.completed ? 'text-primary/50 line-through' : 'text-primary'}`}>{task.type}</p>
                         </div>
                       </div>
                       <button
