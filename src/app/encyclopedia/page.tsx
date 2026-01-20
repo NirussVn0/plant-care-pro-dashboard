@@ -1,21 +1,38 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import EncyclopediaFilters from "@/components/encyclopedia/EncyclopediaFilters";
 import EncyclopediaCard from "@/components/encyclopedia/EncyclopediaCard";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Plant, PlantCategory, PlantDifficulty } from "@/models/Plant";
 import { MdSearch } from "react-icons/md";
+import { animationService } from "@/services/animation/AnimationService";
 
 export default function EncyclopediaPage() {
   const [allPlants, setAllPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<PlantCategory[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<PlantDifficulty | null>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
   }, []);
+
+  // Entrance animations
+  useEffect(() => {
+    if (headerRef.current) {
+      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+    }
+  }, []);
+
+  // Stagger animation for cards when plants change
+  useEffect(() => {
+    if (allPlants.length > 0 && cardsRef.current) {
+      animationService.staggerFadeIn(cardsRef.current.children as unknown as Element[], { stagger: 80, delay: 200 });
+    }
+  }, [allPlants]);
 
   const filteredPlants = useMemo(() => {
     let result = allPlants;
@@ -48,7 +65,8 @@ export default function EncyclopediaPage() {
 
   return (
     <div className="min-h-full">
-      <div className="flex flex-col gap-6 mb-8">
+      <div ref={headerRef} className="flex flex-col gap-6 mb-8 opacity-0">
+
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight mb-2">
@@ -113,9 +131,10 @@ export default function EncyclopediaPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredPlants.map((plant) => (
                 <EncyclopediaCard key={plant.id} plant={plant} />
+
               ))}
             </div>
           )}

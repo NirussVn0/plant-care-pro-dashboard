@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import CareStats from "@/components/logs/CareStats";
 import ServiceFactory from "@/services/ServiceFactory";
 import { CareLog } from "@/models/CareLog";
 import { format } from "date-fns";
 import { MdEdit, MdSearch, MdExpandMore, MdCalendarToday, MdArrowBack, MdAddCircle, MdWaterDrop, MdLocalFlorist, MdEco } from "react-icons/md";
 import Link from "next/link";
+import { animationService } from "@/services/animation/AnimationService";
 
 /**
  * Care Logs page displaying historical plant care activities.
@@ -14,10 +15,26 @@ import Link from "next/link";
  */
 export default function LogsPage() {
   const [logs, setLogs] = useState<CareLog[]>([]);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const logsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ServiceFactory.getCareLogService().getLogs().then(setLogs);
   }, []);
+
+  // Entrance animations
+  useEffect(() => {
+    if (headerRef.current) {
+      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+    }
+  }, []);
+
+  // Stagger animation for logs when loaded
+  useEffect(() => {
+    if (logs.length > 0 && logsRef.current) {
+      animationService.staggerFadeIn(logsRef.current.children as unknown as Element[], { stagger: 120, delay: 300 });
+    }
+  }, [logs]);
 
   const getActionIcon = (action: string) => {
     switch (action) {
@@ -35,6 +52,7 @@ export default function LogsPage() {
     }
   };
 
+
   const getActionColor = (action: string): string => {
     const colors: Record<string, string> = {
       Watering: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200 border-blue-200 dark:border-blue-800",
@@ -47,7 +65,7 @@ export default function LogsPage() {
 
   return (
     <div className="min-h-full max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div ref={headerRef} className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 opacity-0">
         <div className="space-y-1">
           <Link className="text-primary text-sm hover:text-[#005f52] flex items-center gap-1" href="/">
             <MdArrowBack className="text-sm" /> Back to Dashboard
@@ -94,8 +112,9 @@ export default function LogsPage() {
             <div className="h-[1px] flex-1 bg-[#e6f4f2] dark:border-[#354545]" />
           </div>
 
-          <div className="space-y-6">
+          <div ref={logsRef} className="space-y-6">
             {logs.map((log) => (
+
               <div
                 key={log.id}
                 className="bento-card rounded-2xl border border-white dark:border-[#354545] overflow-hidden p-6 flex flex-col md:flex-row gap-6 relative transition-transform hover:-translate-y-1 hover:shadow-md"

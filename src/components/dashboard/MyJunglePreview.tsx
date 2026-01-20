@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MdGridView, MdList, MdMoreHoriz, MdSunny, MdWaterDrop } from "react-icons/md";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Plant } from "@/models/Plant";
+import { animationService } from "@/services/animation/AnimationService";
 
 /**
  * Dashboard component showing a preview of user's plant collection.
@@ -12,6 +13,8 @@ import { Plant } from "@/models/Plant";
 export default function MyJunglePreview() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPlants = async () => {
@@ -27,6 +30,17 @@ export default function MyJunglePreview() {
     fetchPlants();
   }, []);
 
+  // Entrance animations
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      animationService.fadeInUp(containerRef.current, { delay: 200, duration: 600 });
+    }
+    if (!loading && cardsRef.current) {
+      animationService.staggerFadeIn(cardsRef.current.children as unknown as Element[], { stagger: 150, delay: 400 });
+    }
+  }, [loading]);
+
+
   const getNeedsPercentage = (level: string): string => {
     const percentages: Record<string, string> = {
       HIGH: "90%",
@@ -41,7 +55,7 @@ export default function MyJunglePreview() {
   };
 
   return (
-    <div className="space-y-6">
+    <div ref={containerRef} className="space-y-6 opacity-0">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-lg font-display text-text-main dark:text-text-inverse">
           My Jungle
@@ -56,8 +70,9 @@ export default function MyJunglePreview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
+
           [1, 2].map((i) => (
             <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
           ))

@@ -9,7 +9,10 @@ export interface ITaskService {
   getTasksByDate(date: Date): Promise<Task[]>;
   getAllTasks(): Promise<Task[]>;
   getTaskDates(): Promise<string[]>;
+  toggleTaskComplete(taskId: string): Promise<Task | undefined>;
+  addTask(task: Omit<Task, "id">): Promise<Task>;
 }
+
 
 /**
  * Service class for managing plant care tasks.
@@ -54,6 +57,23 @@ export class TaskService implements ITaskService {
     return Promise.resolve(Array.from(dates));
   }
 
+  async toggleTaskComplete(taskId: string): Promise<Task | undefined> {
+    const task = this.tasks.find((t) => t.id === taskId);
+    if (task) {
+      task.completed = !task.completed;
+    }
+    return Promise.resolve(task);
+  }
+
+  async addTask(taskData: Omit<Task, "id">): Promise<Task> {
+    const newTask: Task = {
+      ...taskData,
+      id: String(this.tasks.length + 1),
+    };
+    this.tasks.push(newTask);
+    return Promise.resolve(newTask);
+  }
+
   /**
    * Formats a Date object to YYYY-MM-DD string for comparison.
    */
@@ -61,3 +81,4 @@ export class TaskService implements ITaskService {
     return date.toISOString().split("T")[0];
   }
 }
+
