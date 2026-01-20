@@ -4,10 +4,10 @@ export interface Task {
   id: string;
   type: TaskType;
   plantId: string;
-  plantName: string;
-  dueDate: Date;
+  plantName?: string;
+  date: Date;
   completed: boolean;
   completedDate?: Date;
-  description?: string;
+  note?: string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH';
 }
