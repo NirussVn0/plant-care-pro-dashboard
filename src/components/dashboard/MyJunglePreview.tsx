@@ -119,11 +119,18 @@ export default function MyJunglePreview() {
                   </div>
                 </div>
 
-                <button className="w-full mt-4 py-2 border border-primary text-primary hover:bg-primary hover:text-white transition-all text-xs font-bold rounded-lg uppercase tracking-wide">
-                  View Details
-                </button>
+                {/* Quick Actions */}
+                <div className="flex gap-2 mt-4">
+                  <button className="flex-1 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all text-xs font-bold rounded-lg flex items-center justify-center gap-1">
+                    <MdWaterDrop /> Water
+                  </button>
+                  <button className="flex-1 py-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all text-xs font-bold rounded-lg flex items-center justify-center gap-1">
+                    <MdSunny /> Fertilize
+                  </button>
+                </div>
               </div>
             </div>
+
           ))
         )}
       </div>
