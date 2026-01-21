@@ -7,18 +7,28 @@ import ServiceFactory from "@/services/ServiceFactory";
 import { Plant, PlantCategory, PlantDifficulty } from "@/models/Plant";
 import { MdSearch } from "react-icons/md";
 import { animationService } from "@/services/animation/AnimationService";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function EncyclopediaPage() {
   const [allPlants, setAllPlants] = useState<Plant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategories, setSelectedCategories] = useState<PlantCategory[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<PlantDifficulty | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
-    ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
-  }, []);
+    ServiceFactory.getPlantService()
+      .getAllPlants()
+      .then(setAllPlants)
+      .catch((err) => {
+        console.error("Failed to fetch plants:", err);
+        showToast("Failed to load plants. Please try again.", "error");
+      });
+  }, [showToast]);
 
   // Entrance animations
   useEffect(() => {
@@ -37,8 +47,8 @@ export default function EncyclopediaPage() {
   const filteredPlants = useMemo(() => {
     let result = allPlants;
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       result = result.filter(
         (plant) =>
           plant.name.toLowerCase().includes(query) ||
@@ -55,7 +65,7 @@ export default function EncyclopediaPage() {
     }
 
     return result;
-  }, [allPlants, searchQuery, selectedCategories, selectedDifficulty]);
+  }, [allPlants, debouncedSearchQuery, selectedCategories, selectedDifficulty]);
 
   const handleReset = () => {
     setSearchQuery("");
@@ -134,7 +144,6 @@ export default function EncyclopediaPage() {
             <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredPlants.map((plant) => (
                 <EncyclopediaCard key={plant.id} plant={plant} />
-
               ))}
             </div>
           )}
