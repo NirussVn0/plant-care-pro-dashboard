@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { MdSearch, MdNotifications, MdMenu, MdDarkMode, MdLightMode, MdSettings, MdLogout, MdPerson } from "react-icons/md";
+import { MdSearch, MdMenu, MdDarkMode, MdLightMode, MdSettings, MdLogout, MdPerson } from "react-icons/md";
 import { IoLeaf } from "react-icons/io5";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGlobalSearch } from "@/contexts/GlobalSearchContext";
+import NotificationsDropdown from "@/components/layout/NotificationsDropdown";
 
 const NAV_LINKS = [
   { name: "Dashboard", href: "/" },
@@ -20,6 +22,7 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { openSearch } = useGlobalSearch();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,18 +64,22 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center bg-white dark:bg-[#2d3a3a] rounded-lg px-3 py-1.5 border border-[#e6f4f2] dark:border-[#354545]">
+          <div 
+            onClick={() => openSearch()}
+            className="hidden sm:flex items-center bg-white dark:bg-[#2d3a3a] rounded-lg px-3 py-1.5 border border-[#e6f4f2] dark:border-[#354545] cursor-pointer hover:border-primary transition-colors"
+          >
             <MdSearch className="text-primary text-lg" />
             <input
-              className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-text-muted w-40 ml-2 focus:outline-none"
-              placeholder="Search plants..."
+              className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-text-muted w-40 ml-2 focus:outline-none pointer-events-none"
+              placeholder="Search plants... (Ctrl+K)"
               type="text"
+              readOnly
             />
           </div>
 
-          <button className="p-2 rounded-lg bg-white dark:bg-[#2d3a3a] text-primary hover:bg-[#d6ebe9] dark:hover:bg-[#354545] transition-colors shadow-sm">
-            <MdNotifications size={20} />
-          </button>
+
+
+          <NotificationsDropdown />
 
           <div className="relative" ref={menuRef}>
             <button
@@ -103,10 +110,10 @@ export default function Header() {
                     <MdPerson size={18} className="text-primary" />
                     <span>Profile</span>
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm hover:bg-[#e6f4f2] dark:hover:bg-[#354545] flex items-center gap-3 transition-colors">
+                  <Link href="/settings" className="w-full px-4 py-2 text-left text-sm hover:bg-[#e6f4f2] dark:hover:bg-[#354545] flex items-center gap-3 transition-colors text-text-main dark:text-text-inverse">
                     <MdSettings size={18} className="text-primary" />
                     <span>Settings</span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="border-t border-[#e6f4f2] dark:border-[#354545] py-2">

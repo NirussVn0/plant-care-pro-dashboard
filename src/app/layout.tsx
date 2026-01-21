@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import AppShell from "@/components/layout/AppShell";
 import ToastContainer from "@/components/ui/ToastContainer";
+import { GlobalSearchProvider } from "@/contexts/GlobalSearchContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,8 +36,10 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              <AppShell>{children}</AppShell>
-              <ToastContainer />
+              <GlobalSearchProvider>
+                <AppShell>{children}</AppShell>
+                <ToastContainer />
+              </GlobalSearchProvider>
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>

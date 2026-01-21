@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import LandingPage from "@/components/landing/LandingPage";
 import { useAuth } from "@/contexts/AuthContext";
+import GlobalSearch from "@/components/layout/GlobalSearch";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -34,6 +35,7 @@ export default function AppShell({ children }: AppShellProps) {
         {children}
       </main>
       <Footer />
+      <GlobalSearch />
     </>
   );
 }
