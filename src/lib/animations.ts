@@ -1,7 +1,6 @@
 import anime from "animejs";
 
 /**
- * Fade-in animation with upward movement.
  * Used for entrance animations on cards and elements.
  */
 export const fadeInUp = (targets: string | HTMLElement | HTMLElement[], delay: number = 0) => {
@@ -16,7 +15,6 @@ export const fadeInUp = (targets: string | HTMLElement | HTMLElement[], delay: n
 };
 
 /**
- * Staggered fade-in animation for lists of elements.
  * Each element animates sequentially with configurable initial delay.
  */
 export const staggerFadeIn = (targets: string | HTMLElement | NodeList, delay: number = 0) => {

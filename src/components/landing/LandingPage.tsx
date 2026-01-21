@@ -71,10 +71,7 @@ const TESTIMONIALS = [
   },
 ];
 
-/**
- * Full marketing landing page with anime.js animations.
- * Features: Hero entrance, floating cards, scroll reveals, counter animations.
- */
+
 export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
@@ -103,8 +100,6 @@ export default function LandingPage() {
 
   // Hero entrance animations on mount
   useEffect(() => {
-    // Hydration pattern - intentional state update
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     
     const runHeroAnimations = () => {
@@ -151,12 +146,10 @@ export default function LandingPage() {
       }
     };
 
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(runHeroAnimations, 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Counter animations when stats section becomes visible
   useEffect(() => {
     if (statsVisible && mounted) {
       if (plantsSavedRef.current) {

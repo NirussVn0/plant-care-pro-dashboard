@@ -37,15 +37,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [systemPreference, setSystemPreference] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Hydration from localStorage - this is intentional
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const stored = localStorage.getItem("theme") as Theme | null;
     if (stored) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(stored);
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSystemPreference(
       window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
     );

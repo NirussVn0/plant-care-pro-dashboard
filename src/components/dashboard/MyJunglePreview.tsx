@@ -6,10 +6,6 @@ import ServiceFactory from "@/services/ServiceFactory";
 import { Plant } from "@/models/Plant";
 import { animationService } from "@/services/animation/AnimationService";
 
-/**
- * Dashboard component showing a preview of user's plant collection.
- * Displays top 2 plants with health status and care indicators.
- */
 export default function MyJunglePreview() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);

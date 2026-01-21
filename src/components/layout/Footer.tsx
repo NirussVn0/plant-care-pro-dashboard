@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { IoLeaf } from "react-icons/io5";
 
-/**
- * Footer component with copyright and navigation links.
- */
+
 export default function Footer() {
   return (
     <footer className="w-full border-t border-[#e6f4f2] dark:border-[#354545] bg-background-light dark:bg-background-dark px-6 lg:px-20 py-6">

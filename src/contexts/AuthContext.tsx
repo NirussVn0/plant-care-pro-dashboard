@@ -18,9 +18,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Hook to access authentication context.
- */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -42,18 +39,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Hydration from localStorage - this is intentional
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(JSON.parse(stored));
       } catch {
         localStorage.removeItem("user");
       }
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(false);
   }, []);
 

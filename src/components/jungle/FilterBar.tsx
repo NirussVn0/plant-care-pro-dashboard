@@ -9,10 +9,6 @@ interface FilterBarProps {
   onFilterRoom: (room: string) => void;
 }
 
-/**
- * Filter bar component for the My Jungle page.
- * Provides search input and room filter dropdown.
- */
 export default function FilterBar({ onSearch, onFilterRoom }: FilterBarProps) {
   const [rooms, setRooms] = useState<string[]>([]);
 

@@ -11,9 +11,6 @@ interface AuthModalProps {
   onSwitchMode: (mode: "login" | "signup") => void;
 }
 
-/**
- * Authentication modal for login and signup.
- */
 export default function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

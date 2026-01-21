@@ -7,10 +7,6 @@ import ServiceFactory from "@/services/ServiceFactory";
 import { Task } from "@/models/Task";
 import { animationService } from "@/services/animation/AnimationService";
 
-/**
- * Dashboard component displaying today's plant care tasks.
- * Shows tasks grouped by time period with completion toggles.
- */
 export default function DailyTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);

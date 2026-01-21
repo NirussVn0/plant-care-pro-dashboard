@@ -3,9 +3,6 @@
 import { useRef, useEffect } from "react";
 import { animationService } from "@/services/animation/AnimationService";
 
-/**
- * Dashboard header with animated entrance.
- */
 export default function DashboardHeader() {
   const headerRef = useRef<HTMLDivElement>(null);
 

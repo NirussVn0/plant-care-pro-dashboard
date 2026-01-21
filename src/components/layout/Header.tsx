@@ -15,10 +15,6 @@ const NAV_LINKS = [
   { name: "Care Logs", href: "/logs" },
 ];
 
-/**
- * Application header component with navigation, search, and user controls.
- * Includes user dropdown with theme toggle and logout.
- */
 export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

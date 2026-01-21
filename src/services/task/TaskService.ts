@@ -25,9 +25,6 @@ const MOCK_TASKS: Task[] = [
   { id: "12", plantId: "2", type: "MIST", date: getRelativeDate(18), completed: false },
 ];
 
-/**
- * Helper to get a date relative to today (local timezone safe).
- */
 function getRelativeDate(daysFromNow: number): Date {
   const date = new Date();
   date.setHours(0, 0, 0, 0); // Reset to midnight local time
@@ -35,10 +32,6 @@ function getRelativeDate(daysFromNow: number): Date {
   return date;
 }
 
-/**
- * Formats a Date to YYYY-MM-DD string using local timezone.
- * This is the canonical date format for comparisons.
- */
 function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -59,17 +52,11 @@ export interface ITaskService {
   addTask(task: Omit<Task, "id">): Promise<Task>;
 }
 
-/**
- * Service class for managing plant care tasks.
- * Handles task scheduling, filtering by date, and completion tracking.
- * Simulates async API calls until backend is ready.
- */
+
 export class TaskService implements ITaskService {
   private tasks: Task[] = [...MOCK_TASKS];
 
-  /**
-   * Simulates API delay for realistic behavior.
-   */
+
   private async simulateApiCall<T>(data: T, delayMs = 100): Promise<T> {
     return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
   }
@@ -113,7 +100,4 @@ export class TaskService implements ITaskService {
   }
 }
 
-/**
- * Export formatLocalDate for use in components.
- */
 export { formatLocalDate };

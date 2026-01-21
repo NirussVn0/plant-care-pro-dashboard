@@ -1,8 +1,5 @@
 import anime from "animejs";
 
-/**
- * Animation configuration options.
- */
 export interface AnimationOptions {
   delay?: number;
   duration?: number;
@@ -10,10 +7,7 @@ export interface AnimationOptions {
   stagger?: number;
 }
 
-/**
- * Animation service interface following SOLID principles.
- * Provides a clean API for common animation patterns using anime.js.
- */
+
 export interface IAnimationService {
   fadeInUp(targets: string | Element | Element[], options?: AnimationOptions): anime.AnimeInstance;
   fadeInLeft(targets: string | Element | Element[], options?: AnimationOptions): anime.AnimeInstance;
@@ -36,7 +30,6 @@ const DEFAULTS = {
 } as const;
 
 /**
- * AnimationService - Singleton service for managing anime.js animations.
  * Follows Single Responsibility Principle by encapsulating all animation logic.
  */
 class AnimationService implements IAnimationService {
@@ -52,7 +45,6 @@ class AnimationService implements IAnimationService {
   }
 
   /**
-   * Fade in with upward movement.
    * Great for hero text, headings, and content blocks.
    */
   fadeInUp(targets: string | Element | Element[], options: AnimationOptions = {}): anime.AnimeInstance {
@@ -68,7 +60,6 @@ class AnimationService implements IAnimationService {
 
   /**
    * Fade in from left side.
-   * Great for testimonials and side content.
    */
   fadeInLeft(targets: string | Element | Element[], options: AnimationOptions = {}): anime.AnimeInstance {
     return anime({
@@ -97,7 +88,6 @@ class AnimationService implements IAnimationService {
 
   /**
    * Staggered fade-in for lists and grids.
-   * Each element animates with a delay after the previous.
    */
   staggerFadeIn(targets: string | Element | Element[], options: AnimationOptions = {}): anime.AnimeInstance {
     return anime({
@@ -113,7 +103,6 @@ class AnimationService implements IAnimationService {
   }
 
   /**
-   * Continuous floating animation.
    * Perfect for floating cards and decorative elements.
    */
   float(target: string | Element, options: AnimationOptions = {}): anime.AnimeInstance {
@@ -128,7 +117,6 @@ class AnimationService implements IAnimationService {
   }
 
   /**
-   * Subtle pulse animation.
    * Great for attention-grabbing elements.
    */
   pulse(target: string | Element, options: AnimationOptions = {}): anime.AnimeInstance {
@@ -158,7 +146,6 @@ class AnimationService implements IAnimationService {
 
   /**
    * Animated number counter.
-   * Perfect for statistics and metrics display.
    */
   counterAnimation(target: string | Element, endValue: number, options: AnimationOptions = {}): anime.AnimeInstance {
     const obj = { value: 0 };

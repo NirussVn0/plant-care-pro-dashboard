@@ -9,10 +9,6 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-/**
- * Main application shell that handles authenticated vs landing view.
- * Shows loading skeleton during auth hydration.
- */
 export default function AppShell({ children }: AppShellProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
