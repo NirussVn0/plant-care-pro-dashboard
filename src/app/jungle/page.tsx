@@ -8,6 +8,8 @@ import { Plant } from "@/models/Plant";
 import { MdAdd } from "react-icons/md";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "jungle-page";
+
 export default function MyJunglePage() {
   const [allPlants, setAllPlants] = useState<Plant[]>([]);
   const [query, setQuery] = useState("");
@@ -19,17 +21,34 @@ export default function MyJunglePage() {
     ServiceFactory.getPlantService().getAllPlants().then(setAllPlants);
   }, []);
 
-  // Entrance animations
+  // Entrance animations with session tracking
   useEffect(() => {
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
     if (headerRef.current) {
-      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      if (alreadyPlayed) {
+        animationService.showImmediately(headerRef.current);
+      } else {
+        animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      }
+    }
+
+    if (!alreadyPlayed) {
+      animationService.markPlayed(ANIMATION_KEY);
     }
   }, []);
 
   // Stagger animation for grid when plants change
   useEffect(() => {
     if (allPlants.length > 0 && gridRef.current) {
-      animationService.staggerFadeIn(gridRef.current.children as unknown as Element[], { stagger: 80, delay: 200 });
+      const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+      const children = gridRef.current.children as unknown as Element[];
+
+      if (alreadyPlayed) {
+        animationService.showImmediately(children);
+      } else {
+        animationService.staggerFadeIn(children, { stagger: 80, delay: 200 });
+      }
     }
   }, [allPlants]);
 

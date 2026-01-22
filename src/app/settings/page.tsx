@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MdPerson, MdPalette, MdNotifications, MdSecurity, MdChevronRight, MdDarkMode, MdLightMode } from "react-icons/md";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "settings-page";
+
 const SettingSection = ({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) => (
   <section className="bg-white dark:bg-[#2a3434] rounded-2xl p-6 border border-[#e6f4f2] dark:border-[#354545] opacity-0">
     <div className="flex items-center gap-3 mb-6">
@@ -36,10 +38,19 @@ export default function SettingsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (containerRef.current) {
+    if (!containerRef.current) return;
+
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
+    if (alreadyPlayed) {
+      animationService.showImmediately(containerRef.current);
+      const sections = containerRef.current.querySelectorAll("section");
+      animationService.showImmediately(Array.from(sections));
+    } else {
       animationService.fadeInUp(containerRef.current, { duration: 600 });
       const sections = containerRef.current.querySelectorAll("section");
       animationService.staggerFadeIn(Array.from(sections), { stagger: 100, delay: 200 });
+      animationService.markPlayed(ANIMATION_KEY);
     }
   }, []);
 

@@ -9,6 +9,8 @@ import { MdEdit, MdSearch, MdExpandMore, MdCalendarToday, MdArrowBack, MdAddCirc
 import Link from "next/link";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "logs-page";
+
 /**
  * Care Logs page displaying historical plant care activities.
  * Shows timeline of care actions with search and filtering.
@@ -22,17 +24,31 @@ export default function LogsPage() {
     ServiceFactory.getCareLogService().getLogs().then(setLogs);
   }, []);
 
-  // Entrance animations
+  // Entrance animations with session tracking
   useEffect(() => {
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
     if (headerRef.current) {
-      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      if (alreadyPlayed) {
+        animationService.showImmediately(headerRef.current);
+      } else {
+        animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+        animationService.markPlayed(ANIMATION_KEY);
+      }
     }
   }, []);
 
   // Stagger animation for logs when loaded
   useEffect(() => {
     if (logs.length > 0 && logsRef.current) {
-      animationService.staggerFadeIn(logsRef.current.children as unknown as Element[], { stagger: 120, delay: 300 });
+      const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+      const children = logsRef.current.children as unknown as Element[];
+
+      if (alreadyPlayed) {
+        animationService.showImmediately(children);
+      } else {
+        animationService.staggerFadeIn(children, { stagger: 120, delay: 300 });
+      }
     }
   }, [logs]);
 
@@ -51,7 +67,6 @@ export default function LogsPage() {
         return <MdLocalFlorist size={14} />;
     }
   };
-
 
   const getActionColor = (action: string): string => {
     const colors: Record<string, string> = {
@@ -114,7 +129,6 @@ export default function LogsPage() {
 
           <div ref={logsRef} className="space-y-6">
             {logs.map((log) => (
-
               <div
                 key={log.id}
                 className="bento-card rounded-2xl border border-white dark:border-[#354545] overflow-hidden p-6 flex flex-col md:flex-row gap-6 relative transition-transform hover:-translate-y-1 hover:shadow-md"

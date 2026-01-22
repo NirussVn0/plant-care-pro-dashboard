@@ -7,12 +7,13 @@ import ServiceFactory from "@/services/ServiceFactory";
 import { Task } from "@/models/Task";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "dashboard-daily-tasks";
+
 export default function DailyTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
   const tasksListRef = useRef<HTMLDivElement>(null);
-
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -28,16 +29,30 @@ export default function DailyTasks() {
     fetchTasks();
   }, []);
 
-  // Entrance animation
+  // Entrance animation with session tracking
   useEffect(() => {
-    if (!loading && cardRef.current) {
-      animationService.fadeInUp(cardRef.current, { delay: 100, duration: 600 });
+    if (loading) return;
+
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
+    if (cardRef.current) {
+      if (alreadyPlayed) {
+        animationService.showImmediately(cardRef.current);
+      } else {
+        animationService.fadeInUp(cardRef.current, { delay: 100, duration: 600 });
+      }
     }
-    if (!loading && tasksListRef.current) {
-      animationService.staggerFadeIn(tasksListRef.current.children as unknown as Element[], { stagger: 80, delay: 300 });
+
+    if (tasksListRef.current) {
+      const children = tasksListRef.current.children as unknown as Element[];
+      if (alreadyPlayed) {
+        animationService.showImmediately(children);
+      } else {
+        animationService.staggerFadeIn(children, { stagger: 80, delay: 300 });
+        animationService.markPlayed(ANIMATION_KEY);
+      }
     }
   }, [loading]);
-
 
   const getTaskIcon = (type: string) => {
     const iconStyles: Record<string, string> = {

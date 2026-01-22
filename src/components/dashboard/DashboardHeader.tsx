@@ -3,13 +3,22 @@
 import { useRef, useEffect } from "react";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "dashboard-header";
+
 export default function DashboardHeader() {
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (headerRef.current) {
-      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+    if (!headerRef.current) return;
+
+    // Skip animation if already played this session
+    if (animationService.hasPlayed(ANIMATION_KEY)) {
+      animationService.showImmediately(headerRef.current);
+      return;
     }
+
+    animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+    animationService.markPlayed(ANIMATION_KEY);
   }, []);
 
   return (

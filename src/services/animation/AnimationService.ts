@@ -31,11 +31,78 @@ const DEFAULTS = {
 
 /**
  * Follows Single Responsibility Principle by encapsulating all animation logic.
+ * Now includes session tracking to prevent re-running animations on page revisit.
  */
 class AnimationService implements IAnimationService {
   private static instance: AnimationService;
+  private readonly STORAGE_KEY = "plantcare_animations_played";
 
   private constructor() {}
+
+  /**
+   * Check if a specific animation has already played in this session.
+   * @param key Unique identifier for the animation (e.g., "dashboard-header")
+   */
+  hasPlayed(key: string): boolean {
+    if (typeof window === "undefined") return false;
+    try {
+      const played = sessionStorage.getItem(this.STORAGE_KEY);
+      if (!played) return false;
+      const set: string[] = JSON.parse(played);
+      return set.includes(key);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Mark an animation as played for this session.
+   * @param key Unique identifier for the animation
+   */
+  markPlayed(key: string): void {
+    if (typeof window === "undefined") return;
+    try {
+      const played = sessionStorage.getItem(this.STORAGE_KEY);
+      const set: string[] = played ? JSON.parse(played) : [];
+      if (!set.includes(key)) {
+        set.push(key);
+        sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(set));
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  /**
+   * Clear all animation tracking (useful for testing or forced replay).
+   */
+  clearPlayedAnimations(): void {
+    if (typeof window === "undefined") return;
+    sessionStorage.removeItem(this.STORAGE_KEY);
+  }
+
+  /**
+   * Show element immediately without animation (for already-played cases).
+   */
+  showImmediately(targets: string | Element | Element[]): void {
+    const elements = this.resolveTargets(targets);
+    elements.forEach((el) => {
+      if (el instanceof HTMLElement) {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      }
+    });
+  }
+
+  private resolveTargets(targets: string | Element | Element[]): Element[] {
+    if (typeof targets === "string") {
+      return Array.from(document.querySelectorAll(targets));
+    }
+    if (Array.isArray(targets)) {
+      return targets;
+    }
+    return [targets];
+  }
 
   static getInstance(): AnimationService {
     if (!AnimationService.instance) {

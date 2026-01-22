@@ -6,6 +6,8 @@ import ServiceFactory from "@/services/ServiceFactory";
 import { Plant } from "@/models/Plant";
 import { animationService } from "@/services/animation/AnimationService";
 
+const ANIMATION_KEY = "dashboard-jungle-preview";
+
 export default function MyJunglePreview() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,16 +28,30 @@ export default function MyJunglePreview() {
     fetchPlants();
   }, []);
 
-  // Entrance animations
+  // Entrance animations with session tracking
   useEffect(() => {
-    if (!loading && containerRef.current) {
-      animationService.fadeInUp(containerRef.current, { delay: 200, duration: 600 });
+    if (loading) return;
+
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
+    if (containerRef.current) {
+      if (alreadyPlayed) {
+        animationService.showImmediately(containerRef.current);
+      } else {
+        animationService.fadeInUp(containerRef.current, { delay: 200, duration: 600 });
+      }
     }
-    if (!loading && cardsRef.current) {
-      animationService.staggerFadeIn(cardsRef.current.children as unknown as Element[], { stagger: 150, delay: 400 });
+
+    if (cardsRef.current) {
+      const children = cardsRef.current.children as unknown as Element[];
+      if (alreadyPlayed) {
+        animationService.showImmediately(children);
+      } else {
+        animationService.staggerFadeIn(children, { stagger: 150, delay: 400 });
+        animationService.markPlayed(ANIMATION_KEY);
+      }
     }
   }, [loading]);
-
 
   const getNeedsPercentage = (level: string): string => {
     const percentages: Record<string, string> = {
@@ -68,7 +84,6 @@ export default function MyJunglePreview() {
 
       <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
-
           [1, 2].map((i) => (
             <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
           ))
@@ -130,7 +145,6 @@ export default function MyJunglePreview() {
                 </div>
               </div>
             </div>
-
           ))
         )}
       </div>

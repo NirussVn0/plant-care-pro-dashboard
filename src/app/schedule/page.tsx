@@ -9,6 +9,8 @@ import { animationService } from "@/services/animation/AnimationService";
 import { formatLocalDate } from "@/services/task/TaskService";
 import { MdAdd } from "react-icons/md";
 
+const ANIMATION_KEY = "schedule-page";
+
 export default function SchedulePage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [allTasks, setAllTasks] = useState<Task[]>([]);
@@ -21,16 +23,34 @@ export default function SchedulePage() {
     ServiceFactory.getTaskService().getAllTasks().then(setAllTasks);
   }, []);
 
-  // Entrance animations
+  // Entrance animations with session tracking
   useEffect(() => {
+    const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
+
     if (headerRef.current) {
-      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      if (alreadyPlayed) {
+        animationService.showImmediately(headerRef.current);
+      } else {
+        animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      }
     }
     if (calendarRef.current) {
-      animationService.fadeInLeft(calendarRef.current, { delay: 200, duration: 700 });
+      if (alreadyPlayed) {
+        animationService.showImmediately(calendarRef.current);
+      } else {
+        animationService.fadeInLeft(calendarRef.current, { delay: 200, duration: 700 });
+      }
     }
     if (detailsRef.current) {
-      animationService.fadeInRight(detailsRef.current, { delay: 400, duration: 700 });
+      if (alreadyPlayed) {
+        animationService.showImmediately(detailsRef.current);
+      } else {
+        animationService.fadeInRight(detailsRef.current, { delay: 400, duration: 700 });
+      }
+    }
+
+    if (!alreadyPlayed) {
+      animationService.markPlayed(ANIMATION_KEY);
     }
   }, []);
 
