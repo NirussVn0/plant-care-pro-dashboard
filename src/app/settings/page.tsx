@@ -6,6 +6,30 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MdPerson, MdPalette, MdNotifications, MdSecurity, MdChevronRight, MdDarkMode, MdLightMode } from "react-icons/md";
 import { animationService } from "@/services/animation/AnimationService";
 
+const SettingSection = ({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) => (
+  <section className="bg-white dark:bg-[#2a3434] rounded-2xl p-6 border border-[#e6f4f2] dark:border-[#354545] opacity-0">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+        {icon}
+      </div>
+      <h2 className="text-xl font-bold text-text-main dark:text-text-inverse">{title}</h2>
+    </div>
+    <div className="space-y-4">
+      {children}
+    </div>
+  </section>
+);
+
+const SettingItem = ({ label, description, rightElement }: { label: string; description?: string; rightElement?: React.ReactNode }) => (
+  <div className="flex items-center justify-between py-2">
+    <div>
+      <p className="font-medium text-text-main dark:text-text-inverse">{label}</p>
+      {description && <p className="text-sm text-text-muted">{description}</p>}
+    </div>
+    {rightElement || <MdChevronRight className="text-text-muted" size={24} />}
+  </div>
+);
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
@@ -14,35 +38,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (containerRef.current) {
       animationService.fadeInUp(containerRef.current, { duration: 600 });
-      // Stagger sections
       const sections = containerRef.current.querySelectorAll("section");
       animationService.staggerFadeIn(Array.from(sections), { stagger: 100, delay: 200 });
     }
   }, []);
-
-  const SettingSection = ({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) => (
-    <section className="bg-white dark:bg-[#2a3434] rounded-2xl p-6 border border-[#e6f4f2] dark:border-[#354545] opacity-0">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          {icon}
-        </div>
-        <h2 className="text-xl font-bold text-text-main dark:text-text-inverse">{title}</h2>
-      </div>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </section>
-  );
-
-  const SettingItem = ({ label, description, rightElement }: { label: string; description?: string; rightElement?: React.ReactNode }) => (
-    <div className="flex items-center justify-between py-2">
-      <div>
-        <p className="font-medium text-text-main dark:text-text-inverse">{label}</p>
-        {description && <p className="text-sm text-text-muted">{description}</p>}
-      </div>
-      {rightElement || <MdChevronRight className="text-text-muted" size={24} />}
-    </div>
-  );
 
   return (
     <div ref={containerRef} className="max-w-4xl mx-auto pb-12 opacity-0">

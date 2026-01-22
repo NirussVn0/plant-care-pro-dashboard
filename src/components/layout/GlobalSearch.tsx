@@ -197,7 +197,7 @@ export default function GlobalSearch() {
               ))}
             </div>
           ) : query ? (
-            <div className="p-8 text-center text-text-muted">No results found for "{query}"</div>
+            <div className="p-8 text-center text-text-muted">No results found for &quot;{query}&quot;</div>
           ) : (
              <div className="p-8 text-center text-text-muted text-sm">
                 Type something to search across your jungle.

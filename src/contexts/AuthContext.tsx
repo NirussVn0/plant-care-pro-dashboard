@@ -50,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(false);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const login = useCallback((email: string, _password: string) => {
     const name = email.split("@")[0];
     const newUser: User = {

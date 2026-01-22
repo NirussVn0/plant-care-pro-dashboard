@@ -76,7 +76,7 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
 
   // Refs for hero animations
   const heroBadgeRef = useRef<HTMLDivElement>(null);
@@ -100,6 +100,7 @@ export default function LandingPage() {
 
   // Hero entrance animations on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setMounted(true);
     
     const runHeroAnimations = () => {
