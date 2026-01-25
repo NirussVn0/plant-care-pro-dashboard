@@ -12,3 +12,8 @@ This journal documents critical security learnings, vulnerability patterns, and 
 **Vulnerability:** Missing HTTP security headers (HSTS, X-Frame-Options, X-Content-Type-Options) exposing the app to clickjacking and MIME sniffing.
 **Learning:** Next.js requires explicit configuration in `next.config.ts` to set these headers; they are not on by default.
 **Prevention:** Always verify `next.config.ts` includes a `headers()` function returning standard security headers.
+
+## 2025-02-18 - Missing Permissions-Policy Header
+**Vulnerability:** Missing `Permissions-Policy` header, potentially allowing unauthorized access to powerful browser features (camera, microphone) if an XSS vulnerability exists.
+**Learning:** Defense in depth requires explicitly disabling unused browser features.
+**Prevention:** Configure `Permissions-Policy` in `next.config.ts` to disable features like `camera`, `microphone`, and `geolocation` unless specifically needed.
