@@ -11,6 +11,7 @@ export interface IPlantService {
   getRooms(): Promise<string[]>;
   getCategories(): Promise<PlantCategory[]>;
   getDifficulties(): Promise<PlantDifficulty[]>;
+  searchPlants(query: string, categories: PlantCategory[], difficulty: PlantDifficulty | null): Promise<Plant[]>;
 }
 
 /**
@@ -159,5 +160,32 @@ export class PlantService implements IPlantService {
 
   async getDifficulties(): Promise<PlantDifficulty[]> {
     return Promise.resolve(["Easy", "Intermediate", "Expert"]);
+  }
+
+  async searchPlants(
+    query: string,
+    categories: PlantCategory[],
+    difficulty: PlantDifficulty | null
+  ): Promise<Plant[]> {
+    let result = this.plants;
+
+    if (query) {
+      const lowerQuery = query.toLowerCase();
+      result = result.filter(
+        (plant) =>
+          plant.name.toLowerCase().includes(lowerQuery) ||
+          plant.scientificName.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    if (categories.length > 0) {
+      result = result.filter((plant) => categories.includes(plant.category));
+    }
+
+    if (difficulty) {
+      result = result.filter((plant) => plant.difficulty === difficulty);
+    }
+
+    return Promise.resolve(result);
   }
 }

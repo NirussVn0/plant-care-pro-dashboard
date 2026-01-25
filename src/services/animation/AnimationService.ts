@@ -17,6 +17,7 @@ export interface IAnimationService {
   pulse(target: string | Element, options?: AnimationOptions): anime.AnimeInstance;
   scaleIn(targets: string | Element | Element[], options?: AnimationOptions): anime.AnimeInstance;
   counterAnimation(target: string | Element, endValue: number, options?: AnimationOptions): anime.AnimeInstance;
+  fadeOut(targets: string | Element | Element[], options?: AnimationOptions): anime.AnimeInstance;
 }
 
 /**
@@ -235,6 +236,20 @@ class AnimationService implements IAnimationService {
           element.textContent = formatted;
         }
       },
+    });
+  }
+
+  /**
+   * Fade out elements.
+   * Useful for exit animations.
+   */
+  fadeOut(targets: string | Element | Element[], options: AnimationOptions = {}): anime.AnimeInstance {
+    return anime({
+      targets,
+      opacity: [1, 0],
+      duration: options.duration ?? 400,
+      easing: options.easing ?? "easeOutQuad",
+      delay: options.delay ?? 0,
     });
   }
 }

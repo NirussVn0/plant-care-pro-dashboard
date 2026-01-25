@@ -13,7 +13,7 @@ import { useToast } from "@/contexts/ToastContext";
 const ANIMATION_KEY = "encyclopedia-page";
 
 export default function EncyclopediaPage() {
-  const [allPlants, setAllPlants] = useState<Plant[]>([]);
+  const [plants, setPlants] = useState<Plant[]>(); // Use undefined to check loading state
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategories, setSelectedCategories] = useState<PlantCategory[]>([]);
@@ -22,66 +22,55 @@ export default function EncyclopediaPage() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
+  // Fetch plants with filtering via Service (OOP)
   useEffect(() => {
-    ServiceFactory.getPlantService()
-      .getAllPlants()
-      .then(setAllPlants)
-      .catch((err) => {
+    // Fade out old results
+    if (cardsRef.current) {
+      animationService.fadeOut(cardsRef.current.children as unknown as HTMLElement[], { duration: 200 });
+    }
+
+    const fetchPlants = async () => {
+      try {
+        const results = await ServiceFactory.getPlantService().searchPlants(
+          debouncedSearchQuery,
+          selectedCategories,
+          selectedDifficulty
+        );
+        
+        // Small delay to allow fade out to complete naturally
+        setTimeout(() => {
+          setPlants(results);
+        }, 200);
+      } catch (err) {
         console.error("Failed to fetch plants:", err);
         showToast("Failed to load plants. Please try again.", "error");
-      });
-  }, [showToast]);
+      }
+    };
 
-  // Entrance animations with session tracking
+    fetchPlants();
+  }, [debouncedSearchQuery, selectedCategories, selectedDifficulty, showToast]);
+
+  // Handle Entrance Animations
   useEffect(() => {
     const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
-
-    if (headerRef.current) {
-      if (alreadyPlayed) {
-        animationService.showImmediately(headerRef.current);
-      } else {
-        animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
-        animationService.markPlayed(ANIMATION_KEY);
-      }
+    if (headerRef.current && !alreadyPlayed) {
+      animationService.fadeInUp(headerRef.current, { delay: 0, duration: 600 });
+      animationService.markPlayed(ANIMATION_KEY);
+    } else if (headerRef.current) {
+      animationService.showImmediately(headerRef.current);
     }
   }, []);
 
-  // Stagger animation for cards when plants change
+  // Handle Card Stagger Animation when data changes
   useEffect(() => {
-    if (allPlants.length > 0 && cardsRef.current) {
-      const alreadyPlayed = animationService.hasPlayed(ANIMATION_KEY);
-      const children = cardsRef.current.children as unknown as Element[];
-
-      if (alreadyPlayed) {
-        animationService.showImmediately(children);
-      } else {
-        animationService.staggerFadeIn(children, { stagger: 80, delay: 200 });
-      }
+    if (plants && cardsRef.current) {
+      animationService.staggerFadeIn(cardsRef.current.children as unknown as HTMLElement[], { 
+        stagger: 50, 
+        delay: 0,
+        duration: 400 
+      });
     }
-  }, [allPlants]);
-
-  const filteredPlants = useMemo(() => {
-    let result = allPlants;
-
-    if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      result = result.filter(
-        (plant) =>
-          plant.name.toLowerCase().includes(query) ||
-          plant.scientificName.toLowerCase().includes(query)
-      );
-    }
-
-    if (selectedCategories.length > 0) {
-      result = result.filter((plant) => selectedCategories.includes(plant.category));
-    }
-
-    if (selectedDifficulty) {
-      result = result.filter((plant) => plant.difficulty === selectedDifficulty);
-    }
-
-    return result;
-  }, [allPlants, debouncedSearchQuery, selectedCategories, selectedDifficulty]);
+  }, [plants]);
 
   const handleReset = () => {
     setSearchQuery("");
@@ -92,7 +81,6 @@ export default function EncyclopediaPage() {
   return (
     <div className="min-h-full">
       <div ref={headerRef} className="flex flex-col gap-6 mb-8 opacity-0">
-
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight mb-2">
@@ -136,7 +124,7 @@ export default function EncyclopediaPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-[600px]">
         <EncyclopediaFilters
           selectedCategories={selectedCategories}
           selectedDifficulty={selectedDifficulty}
@@ -146,8 +134,13 @@ export default function EncyclopediaPage() {
         />
 
         <div className="lg:col-span-9">
-          {filteredPlants.length === 0 ? (
-            <div className="text-center py-12">
+          {!plants ? (
+             // Loading skeleton or empty state while fetching
+             <div className="flex justify-center py-20">
+                <div className="animate-pulse text-primary font-bold">Loading flora...</div>
+             </div>
+          ) : plants.length === 0 ? (
+            <div className="text-center py-12 animate-fade-in">
               <p className="text-text-muted text-lg">No plants found matching your criteria.</p>
               <button
                 onClick={handleReset}
@@ -158,17 +151,21 @@ export default function EncyclopediaPage() {
             </div>
           ) : (
             <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredPlants.map((plant) => (
-                <EncyclopediaCard key={plant.id} plant={plant} />
+              {plants.map((plant) => (
+                <div key={plant.id} className="opacity-0">
+                  <EncyclopediaCard plant={plant} />
+                </div>
               ))}
             </div>
           )}
 
-          <div className="mt-12 flex justify-center">
-            <p className="text-sm text-text-muted">
-              Showing {filteredPlants.length} of {allPlants.length} plants
-            </p>
-          </div>
+          {plants && plants.length > 0 && (
+            <div className="mt-12 flex justify-center">
+              <p className="text-sm text-text-muted">
+                Showing {plants.length} plants
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

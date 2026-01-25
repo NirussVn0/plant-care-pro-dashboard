@@ -19,10 +19,6 @@ interface EncyclopediaFiltersProps {
   onReset: () => void;
 }
 
-/**
- * Sidebar filter component for the Encyclopedia page.
- * Provides category, difficulty, and light needs filtering options.
- */
 export default function EncyclopediaFilters({
   selectedCategories,
   selectedDifficulty,
