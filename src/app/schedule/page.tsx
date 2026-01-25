@@ -8,6 +8,7 @@ import { Task } from "@/models/Task";
 import { animationService } from "@/services/animation/AnimationService";
 import { formatLocalDate } from "@/services/task/TaskService";
 import { MdAdd } from "react-icons/md";
+import AddTaskModal from "@/components/schedule/AddTaskModal";
 
 const ANIMATION_KEY = "schedule-page";
 
@@ -115,20 +116,23 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* AddTaskModal placeholder - to be implemented */}
+      {/* Add Task Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddModal(false)}>
-          <div className="bg-white dark:bg-[#2a3434] rounded-2xl p-6 w-full max-w-md m-4" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Add New Task</h2>
-            <p className="text-primary mb-4">Task creation form coming soon!</p>
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="w-full py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-[#005f52] transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <AddTaskModal
+          onClose={() => setShowAddModal(false)}
+          onAddTask={async (newTask) => {
+            const createdTask = await ServiceFactory.getTaskService().addTask({
+              plantId: newTask.plantId,
+              plantName: newTask.plantName,
+              type: newTask.type,
+              date: newTask.date,
+              completed: false,
+              priority: "MEDIUM",
+            });
+            setAllTasks((prev) => [...prev, createdTask]);
+            setShowAddModal(false);
+          }}
+        />
       )}
     </div>
   );

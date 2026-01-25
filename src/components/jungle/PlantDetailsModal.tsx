@@ -3,7 +3,8 @@
 import { Plant } from "@/models/Plant";
 import { MdClose, MdSunny, MdWaterDrop, MdOpacity, MdPets, MdCalendarToday, MdLocalFlorist } from "react-icons/md";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { animationService } from "@/services/animation/AnimationService";
 
 interface PlantDetailsModalProps {
@@ -14,17 +15,22 @@ interface PlantDetailsModalProps {
 export default function PlantDetailsModal({ plant, onClose }: PlantDetailsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (contentRef.current) {
-      animationService.scaleIn(contentRef.current, { duration: 300 });
-    }
-    // Prevent body scroll
+    setMounted(true);
+    // Prevent body scroll (handled in return/unmount implicitly or here)
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
   }, []);
+
+  useEffect(() => {
+    if (mounted && contentRef.current) {
+      animationService.scaleIn(contentRef.current, { duration: 300 });
+    }
+  }, [mounted]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === modalRef.current) {
@@ -46,15 +52,17 @@ export default function PlantDetailsModal({ plant, onClose }: PlantDetailsModalP
     return colors[level] || "bg-gray-100 text-gray-700";
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       ref={modalRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
       <div
         ref={contentRef}
-        className="bg-white dark:bg-[#2a3434] rounded-2xl overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+        className="bg-white dark:bg-[#2a3434] rounded-2xl overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
       >
         {/* Header Image */}
         <div className="relative h-64 md:h-80">
@@ -68,7 +76,7 @@ export default function PlantDetailsModal({ plant, onClose }: PlantDetailsModalP
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full backdrop-blur-md transition-all"
+            className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white text-white hover:text-primary rounded-full backdrop-blur-md transition-all z-20"
           >
             <MdClose className="text-xl" />
           </button>
@@ -184,6 +192,7 @@ export default function PlantDetailsModal({ plant, onClose }: PlantDetailsModalP
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

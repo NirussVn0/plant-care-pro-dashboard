@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { MdWaterDrop } from "react-icons/md";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { MdWaterDrop, MdCheck } from "react-icons/md";
 import BentoCard from "@/components/ui/BentoCard";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Task } from "@/models/Task";
@@ -15,21 +15,22 @@ export default function DailyTasks() {
   const cardRef = useRef<HTMLDivElement>(null);
   const tasksListRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const dailyTasks = await ServiceFactory.getTaskService().getDailyTasks();
-        setTasks(dailyTasks);
-      } catch (error) {
-        console.error("Failed to fetch tasks", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTasks();
+  const fetchTasks = useCallback(async () => {
+    try {
+      const dailyTasks = await ServiceFactory.getTaskService().getDailyTasks();
+      setTasks(dailyTasks);
+    } catch (error) {
+      console.error("Failed to fetch tasks", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Entrance animation with session tracking
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Entrance animation with TTL tracking
   useEffect(() => {
     if (loading) return;
 
@@ -53,6 +54,25 @@ export default function DailyTasks() {
       }
     }
   }, [loading]);
+
+  const handleToggleTask = useCallback(async (taskId: string) => {
+    const updatedTask = await ServiceFactory.getTaskService().toggleTaskComplete(taskId);
+    if (updatedTask) {
+      setTasks((prev) =>
+        prev
+          .map((task) => (task.id === taskId ? { ...task, completed: updatedTask.completed } : task))
+          .sort((a, b) => Number(a.completed) - Number(b.completed))
+      );
+    }
+  }, []);
+
+  const handleCompleteAll = useCallback(async () => {
+    const incompleteTasks = tasks.filter((t) => !t.completed);
+    for (const task of incompleteTasks) {
+      await ServiceFactory.getTaskService().toggleTaskComplete(task.id);
+    }
+    fetchTasks();
+  }, [tasks, fetchTasks]);
 
   const getTaskIcon = (type: string) => {
     const iconStyles: Record<string, string> = {
@@ -82,7 +102,7 @@ export default function DailyTasks() {
         title="Daily Tasks"
         headerAction={
           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-bold">
-            {tasks.length} Total
+            {tasks.filter((t) => !t.completed).length} Remaining
           </span>
         }
         className="h-full"
@@ -102,15 +122,23 @@ export default function DailyTasks() {
             tasks.map((task) => (
               <label
                 key={task.id}
-                className="flex items-center gap-3 p-3 hover:bg-background-light dark:hover:bg-background-dark/50 rounded-lg cursor-pointer group transition-all opacity-0"
+                className={`flex items-center gap-3 p-3 hover:bg-background-light dark:hover:bg-background-dark/50 rounded-lg cursor-pointer group transition-all opacity-0 ${
+                  task.completed ? "opacity-60" : ""
+                }`}
               >
-                <input
-                  className="appearance-none rounded-lg border-2 border-primary checked:bg-primary checked:border-primary size-5 transition-colors cursor-pointer"
-                  type="checkbox"
-                />
+                <button
+                  onClick={() => handleToggleTask(task.id)}
+                  className={`flex items-center justify-center size-5 rounded-lg border-2 transition-all ${
+                    task.completed
+                      ? "bg-primary border-primary text-white"
+                      : "border-primary hover:bg-primary/10"
+                  }`}
+                >
+                  {task.completed && <MdCheck size={14} />}
+                </button>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">
-                    {formatTaskType(task.type)}: {task.plantName}
+                  <p className={`text-sm font-semibold ${task.completed ? "line-through text-text-muted" : ""}`}>
+                    {formatTaskType(task.type)}: {task.plantName || "Plant"}
                   </p>
                   <p className="text-[10px] text-text-muted">{getTimeLabel(task)}</p>
                 </div>
@@ -122,7 +150,11 @@ export default function DailyTasks() {
           )}
         </div>
 
-        <button className="w-full mt-6 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-secondary transition-colors">
+        <button
+          onClick={handleCompleteAll}
+          disabled={tasks.every((t) => t.completed)}
+          className="w-full mt-6 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Complete All
         </button>
       </BentoCard>

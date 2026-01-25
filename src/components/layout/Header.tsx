@@ -79,6 +79,14 @@ export default function Header() {
 
 
 
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-full hover:bg-white/50 dark:hover:bg-white/10 transition-colors text-primary"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <MdLightMode size={24} /> : <MdDarkMode size={24} />}
+          </button>
+
           <NotificationsDropdown />
 
           <div className="relative" ref={menuRef}>

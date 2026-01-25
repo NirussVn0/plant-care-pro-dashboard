@@ -36,38 +36,42 @@ const DEFAULTS = {
 class AnimationService implements IAnimationService {
   private static instance: AnimationService;
   private readonly STORAGE_KEY = "plantcare_animations_played";
+  private readonly TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
 
   private constructor() {}
 
   /**
-   * Check if a specific animation has already played in this session.
+   * Check if a specific animation has already played recently (within TTL).
+   * Uses localStorage with timestamps to persist across reloads.
    * @param key Unique identifier for the animation (e.g., "dashboard-header")
    */
   hasPlayed(key: string): boolean {
     if (typeof window === "undefined") return false;
     try {
-      const played = sessionStorage.getItem(this.STORAGE_KEY);
-      if (!played) return false;
-      const set: string[] = JSON.parse(played);
-      return set.includes(key);
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) return false;
+      const data: Record<string, number> = JSON.parse(stored);
+      const timestamp = data[key];
+      if (!timestamp) return false;
+      // Check if TTL has expired
+      const now = Date.now();
+      return now - timestamp < this.TTL_MS;
     } catch {
       return false;
     }
   }
 
   /**
-   * Mark an animation as played for this session.
+   * Mark an animation as played with current timestamp.
    * @param key Unique identifier for the animation
    */
   markPlayed(key: string): void {
     if (typeof window === "undefined") return;
     try {
-      const played = sessionStorage.getItem(this.STORAGE_KEY);
-      const set: string[] = played ? JSON.parse(played) : [];
-      if (!set.includes(key)) {
-        set.push(key);
-        sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(set));
-      }
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      const data: Record<string, number> = stored ? JSON.parse(stored) : {};
+      data[key] = Date.now();
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Ignore storage errors
     }
@@ -78,7 +82,7 @@ class AnimationService implements IAnimationService {
    */
   clearPlayedAnimations(): void {
     if (typeof window === "undefined") return;
-    sessionStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.STORAGE_KEY);
   }
 
   /**

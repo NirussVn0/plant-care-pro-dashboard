@@ -54,8 +54,51 @@ export interface ITaskService {
 
 
 export class TaskService implements ITaskService {
-  private tasks: Task[] = [...MOCK_TASKS];
+  private tasks: Task[] = [];
+  private readonly STORAGE_KEY = "plantcare_tasks";
 
+  constructor() {
+    this.loadFromStorage();
+  }
+
+  private loadFromStorage(): void {
+    // Start with mock data
+    this.tasks = [...MOCK_TASKS];
+    
+    if (typeof window === "undefined") return;
+    
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored) {
+        const savedTasks: Task[] = JSON.parse(stored);
+        // Restore dates (JSON parsing loses Date objects)
+        savedTasks.forEach((t) => {
+          t.date = new Date(t.date);
+        });
+        // Merge: update mock tasks if completed, add new tasks
+        savedTasks.forEach((savedTask) => {
+          const mockTask = this.tasks.find((t) => t.id === savedTask.id);
+          if (mockTask) {
+            mockTask.completed = savedTask.completed;
+          } else {
+            // User-added task
+            this.tasks.push(savedTask);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load tasks from storage", err);
+    }
+  }
+
+  private saveToStorage(): void {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tasks));
+    } catch (err) {
+      console.error("Failed to save tasks to storage", err);
+    }
+  }
 
   private async simulateApiCall<T>(data: T, delayMs = 100): Promise<T> {
     return new Promise((resolve) => setTimeout(() => resolve(data), delayMs));
@@ -86,6 +129,7 @@ export class TaskService implements ITaskService {
     const task = this.tasks.find((t) => t.id === taskId);
     if (task) {
       task.completed = !task.completed;
+      this.saveToStorage();
     }
     return this.simulateApiCall(task ? { ...task } : undefined);
   }
@@ -96,6 +140,7 @@ export class TaskService implements ITaskService {
       id: String(Date.now()), // Use timestamp for unique ID
     };
     this.tasks.push(newTask);
+    this.saveToStorage();
     return this.simulateApiCall(newTask);
   }
 }
