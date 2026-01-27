@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+/* Tailwind v4: Configure dark mode to use class selector */
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Brand Colors from Design */
+  --color-primary: #007969;
+  --color-secondary: #005f52; /* Darker shade of primary for hover */
+  --color-accent-warm: #E6947D;
+  --color-sun-yellow: #F2D980;
+  
+  /* Background Colors */
+  --color-background-light: #f4f3f1;
+  --color-background-dark: #222a2a;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #2a3434;
+
+  /* Text Colors */
+  --color-text-main: #0c1d1a;
+  --color-text-inverse: #f8fcfb;
+  --color-text-muted: #45a194;
+
+  /* Fonts */
+  --font-display: "Manrope", sans-serif;
+  --font-sans: "Manrope", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --foreground-rgb: 12, 29, 26;
+  --background-start-rgb: 244, 243, 241;
+  --background-end-rgb: 244, 243, 241;
+}
+
+body {
+  color: var(--color-text-main);
+  background: var(--color-background-light);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode body styles - triggered by .dark class on html */
+.dark body {
+  background: var(--color-background-dark);
+  color: var(--color-text-inverse);
+}
+
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-primary), transparent 80%);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-primary), transparent 60%);
+}
+
+.bento-card {
+    @apply bg-surface-light dark:bg-surface-dark rounded-xl border border-white dark:border-[#354545] shadow-sm;
+}

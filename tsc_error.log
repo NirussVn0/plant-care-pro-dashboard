@@ -1,0 +1,1 @@
+src/app/encyclopedia/page.tsx(29,24): error TS2339: Property 'fadeOut' does not exist on type 'AnimationService'.
