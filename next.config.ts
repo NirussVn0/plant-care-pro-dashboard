@@ -55,13 +55,10 @@ const nextConfig: NextConfig = {
             key: "Referrer-Policy",
             value: "origin-when-cross-origin",
           },
-<<<<<<< HEAD
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
           },
-=======
->>>>>>> main
         ],
       },
     ];
