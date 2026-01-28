@@ -9,6 +9,7 @@ interface UseScrollAnimationOptions extends AnimationOptions {
   type?: AnimationType;
   threshold?: number;
   triggerOnce?: boolean;
+  key?: string; // Unique key for session tracking
 }
 
 /**
@@ -30,11 +31,15 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     duration,
     easing,
     stagger,
+    key,
   } = options;
 
   const ref = useRef<T>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const hasAnimated = useRef(false);
+  const [isVisible, setIsVisible] = useState(() => {
+    // Initial state check: if key provided and played, show immediately
+    return key ? animationService.hasPlayed(key) : false;
+  });
+  const hasAnimated = useRef(key ? animationService.hasPlayed(key) : false);
 
   // Memoize animation options to prevent unstable dependency
   const animationOptions = useMemo<AnimationOptions>(() => ({
@@ -45,6 +50,12 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   }), [delay, duration, easing, stagger]);
 
   const animate = useCallback((element: T) => {
+    // If key provided and played, ensure valid state without re-running animejs
+    if (key && animationService.hasPlayed(key)) {
+        animationService.showImmediately(element);
+        return;
+    }
+
     switch (type) {
       case "fadeInUp":
         animationService.fadeInUp(element, animationOptions);
@@ -62,7 +73,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
         animationService.scaleIn(element, animationOptions);
         break;
     }
-  }, [type, animationOptions]);
+  }, [type, animationOptions, key]);
 
 
   useEffect(() => {
@@ -77,6 +88,8 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
             
             setIsVisible(true);
             hasAnimated.current = true;
+            if (key) animationService.markPlayed(key);
+            
             animate(element as T);
 
             if (triggerOnce) {

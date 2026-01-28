@@ -19,147 +19,41 @@ export interface IPlantService {
  * Implements IPlantService interface with mock data storage.
  */
 export class PlantService implements IPlantService {
-  private readonly plants: Plant[] = [
-    {
-      id: "1",
-      name: "Monstera Deliciosa",
-      scientificName: "Swiss Cheese Plant",
-      room: "Living Room",
-      location: "Living Room",
-      images: ["https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=800"],
-      health: 85,
-      needs: { water: "MED", light: "HIGH", humidity: "HIGH" },
-      category: "Tropical",
-      difficulty: "Intermediate",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-10"),
-    },
-    {
-      id: "2",
-      name: "Fiddle Leaf Fig",
-      scientificName: "Ficus Lyrata",
-      room: "Bedroom",
-      location: "Bedroom",
-      images: ["https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=800"],
-      health: 92,
-      needs: { water: "HIGH", light: "HIGH", humidity: "MED" },
-      category: "Tropical",
-      difficulty: "Expert",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-12"),
-    },
-    {
-      id: "3",
-      name: "Snake Plant",
-      scientificName: "Sansevieria Trifasciata",
-      room: "Balcony",
-      location: "Balcony",
-      images: ["https://images.unsplash.com/photo-1572688484438-313a6e50c333?auto=format&fit=crop&q=80&w=800"],
-      health: 98,
-      needs: { water: "LOW", light: "LOW", humidity: "LOW" },
-      category: "Succulents",
-      difficulty: "Easy",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-01"),
-    },
-    {
-      id: "4",
-      name: "Neon Pothos",
-      scientificName: "Epipremnum Aureum",
-      room: "Kitchen",
-      location: "Kitchen",
-      images: ["https://images.unsplash.com/photo-1602923668104-8f9e03e77e62?auto=format&fit=crop&q=80&w=800"],
-      health: 95,
-      needs: { water: "MED", light: "MED", humidity: "HIGH" },
-      category: "Tropical",
-      difficulty: "Easy",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-14"),
-    },
-    {
-      id: "5",
-      name: "Rubber Plant",
-      scientificName: "Ficus Elastica",
-      room: "Office",
-      location: "Office",
-      images: ["https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&q=80&w=800"],
-      health: 88,
-      needs: { water: "MED", light: "MED", humidity: "MED" },
-      category: "Tropical",
-      difficulty: "Intermediate",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-11"),
-    },
-    {
-      id: "6",
-      name: "Boston Fern",
-      scientificName: "Nephrolepis Exaltata",
-      room: "Bathroom",
-      location: "Bathroom",
-      images: ["https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&auto=format&fit=crop&q=60"],
-      health: 80,
-      needs: { water: "HIGH", light: "MED", humidity: "HIGH" },
-      category: "Ferns",
-      difficulty: "Intermediate",
-      petFriendly: true,
-      lastWatered: new Date("2023-05-13"),
-    },
-    {
-      id: "7",
-      name: "Echeveria",
-      scientificName: "Echeveria Elegans",
-      room: "Living Room",
-      location: "Living Room",
-      images: ["https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=800&auto=format&fit=crop&q=60"],
-      health: 95,
-      needs: { water: "LOW", light: "HIGH", humidity: "LOW" },
-      category: "Succulents",
-      difficulty: "Easy",
-      petFriendly: true,
-      lastWatered: new Date("2023-05-05"),
-    },
-    {
-      id: "8",
-      name: "Peace Lily",
-      scientificName: "Spathiphyllum",
-      room: "Bedroom",
-      location: "Bedroom",
-      images: ["https://images.unsplash.com/photo-1593691509543-c55fb32d8de5?w=800&auto=format&fit=crop&q=60"],
-      health: 90,
-      needs: { water: "MED", light: "LOW", humidity: "HIGH" },
-      category: "Flowering",
-      difficulty: "Easy",
-      petFriendly: false,
-      lastWatered: new Date("2023-05-12"),
-    },
-  ];
+  private readonly baseUrl = "http://localhost:3000/plants";
 
   async getAllPlants(): Promise<Plant[]> {
-    return Promise.resolve(this.plants);
+    const res = await fetch(this.baseUrl);
+    if (!res.ok) throw new Error("Failed to fetch plants");
+    return res.json();
   }
 
   async getPlantById(id: string): Promise<Plant | undefined> {
-    return Promise.resolve(this.plants.find((plant) => plant.id === id));
+    const res = await fetch(`${this.baseUrl}/${id}`);
+    if (!res.ok) return undefined;
+    return res.json();
   }
 
   async getPlantsByRoom(room: string): Promise<Plant[]> {
+    const plants = await this.getAllPlants();
     if (room === "All Rooms") {
-      return this.getAllPlants();
+      return plants;
     }
-    return Promise.resolve(this.plants.filter((plant) => plant.room === room));
+    return plants.filter((plant) => plant.room === room);
   }
 
   async getRooms(): Promise<string[]> {
-    const uniqueRooms = new Set(this.plants.map((plant) => plant.room));
-    return Promise.resolve(["All Rooms", ...Array.from(uniqueRooms)]);
+    const plants = await this.getAllPlants();
+    const uniqueRooms = new Set(plants.map((plant) => plant.room));
+    return ["All Rooms", ...Array.from(uniqueRooms)];
   }
 
   async getCategories(): Promise<PlantCategory[]> {
-    return Promise.resolve(["Succulents", "Tropical", "Ferns", "Cacti", "Flowering"]);
+    // These could be fetched from backend config entirely, but hardcoded is fine for now
+    return ["Succulents", "Tropical", "Ferns", "Cacti", "Flowering"];
   }
 
   async getDifficulties(): Promise<PlantDifficulty[]> {
-    return Promise.resolve(["Easy", "Intermediate", "Expert"]);
+    return ["Easy", "Intermediate", "Expert"];
   }
 
   async searchPlants(
@@ -167,7 +61,7 @@ export class PlantService implements IPlantService {
     categories: PlantCategory[],
     difficulty: PlantDifficulty | null
   ): Promise<Plant[]> {
-    let result = this.plants;
+    let result = await this.getAllPlants();
 
     if (query) {
       const lowerQuery = query.toLowerCase();
@@ -186,6 +80,6 @@ export class PlantService implements IPlantService {
       result = result.filter((plant) => plant.difficulty === difficulty);
     }
 
-    return Promise.resolve(result);
+    return result;
   }
 }
