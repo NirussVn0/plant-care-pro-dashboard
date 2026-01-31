@@ -1,32 +1,40 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { MdGridView, MdList, MdMoreHoriz, MdSunny, MdWaterDrop } from "react-icons/md";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { MdGridView, MdList, MdMoreHoriz, MdSunny, MdWaterDrop, MdRefresh, MdErrorOutline } from "react-icons/md";
 import ServiceFactory from "@/services/ServiceFactory";
 import { Plant } from "@/models/Plant";
 import { animationService } from "@/services/animation/AnimationService";
+import { useToast } from "@/contexts/ToastContext";
 
 const ANIMATION_KEY = "dashboard-jungle-preview";
 
 export default function MyJunglePreview() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
+
+  const fetchPlants = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const allPlants = await ServiceFactory.getPlantService().getAllPlants();
+      setPlants(allPlants.slice(0, 2));
+    } catch (error) {
+      console.error(error);
+      setError(true);
+      showToast("Failed to load your jungle. Please try again later.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   useEffect(() => {
-    const fetchPlants = async () => {
-      try {
-        const allPlants = await ServiceFactory.getPlantService().getAllPlants();
-        setPlants(allPlants.slice(0, 2));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPlants();
-  }, []);
+  }, [fetchPlants]);
 
   // Entrance animations with session tracking
   useEffect(() => {
@@ -87,6 +95,19 @@ export default function MyJunglePreview() {
           [1, 2].map((i) => (
             <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
           ))
+        ) : error ? (
+          <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center p-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 min-h-[200px]">
+            <div className="text-red-500 mb-2">
+              <MdErrorOutline size={32} />
+            </div>
+            <p className="text-sm text-text-muted mb-4 font-medium">Failed to load your jungle</p>
+            <button
+              onClick={fetchPlants}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-xs font-bold text-text-main dark:text-text-inverse"
+            >
+              <MdRefresh size={16} /> Try Again
+            </button>
+          </div>
         ) : (
           plants.map((plant) => (
             <div key={plant.id} className="bento-card group overflow-hidden">
