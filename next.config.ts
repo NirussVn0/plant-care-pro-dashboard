@@ -27,10 +27,35 @@ const nextConfig: NextConfig = {
   // bundleAnalyzer: { enabled: process.env.ANALYZE === 'true' },
 
   async headers() {
+    // Content Security Policy
+    // Note: 'unsafe-eval' and 'unsafe-inline' are currently required for Next.js hydration and dev mode.
+    // In a strict environment, nonces should be used.
+    const isProd = process.env.NODE_ENV === "production";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const cspHeader = `
+      default-src 'self';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' blob: data: https://images.unsplash.com https://lh3.googleusercontent.com https://api.dicebear.com https://www.transparenttextures.com;
+      font-src 'self';
+      connect-src 'self' https://api.dicebear.com ${apiUrl};
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      ${isProd ? "upgrade-insecure-requests;" : ""}
+    `
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
     return [
       {
         source: "/:path*",
         headers: [
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader,
+          },
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",
