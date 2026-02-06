@@ -61,6 +61,35 @@ export class TaskService implements ITaskService {
     this.loadFromStorage();
   }
 
+  /**
+   * Validates task structure and enforces security limits.
+   * Prevents insecure deserialization and DoS via large payloads.
+   */
+  private isValidTask(task: unknown): boolean {
+    if (!task || typeof task !== "object") return false;
+
+    const t = task as Record<string, unknown>;
+
+    // Required string fields
+    if (typeof t.id !== "string") return false;
+    if (typeof t.plantId !== "string") return false;
+
+    // Validate Type
+    const VALID_TYPES = ["WATER", "MIST", "FERTILIZE", "PRUNE", "REPOTTING"];
+    if (typeof t.type !== "string" || !VALID_TYPES.includes(t.type)) return false;
+
+    // Input Validation: Note length limit (Defense in Depth)
+    if (t.note !== undefined && t.note !== null) {
+      if (typeof t.note !== "string") return false;
+      if (t.note.length > 500) return false; // Prevent large payload storage
+    }
+
+    // Date must exist
+    if (!t.date) return false;
+
+    return true;
+  }
+
   private loadFromStorage(): void {
     // Start with mock data
     this.tasks = [...MOCK_TASKS];
@@ -70,19 +99,33 @@ export class TaskService implements ITaskService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const savedTasks: Task[] = JSON.parse(stored);
-        // Restore dates (JSON parsing loses Date objects)
-        savedTasks.forEach((t) => {
+        let parsed: unknown[] = [];
+        try {
+          const result = JSON.parse(stored);
+          if (Array.isArray(result)) parsed = result;
+        } catch {
+          // Invalid JSON, ignore
+          return;
+        }
+
+        // Validate and merge
+        parsed.forEach((savedTask) => {
+          // Security: Skip invalid tasks (prevents pollution from modified localStorage)
+          if (!this.isValidTask(savedTask)) return;
+
+          // Safe to cast after validation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const t = savedTask as any;
+
+          // Restore dates (JSON parsing loses Date objects)
           t.date = new Date(t.date);
-        });
-        // Merge: update mock tasks if completed, add new tasks
-        savedTasks.forEach((savedTask) => {
-          const mockTask = this.tasks.find((t) => t.id === savedTask.id);
+
+          const mockTask = this.tasks.find((existing) => existing.id === t.id);
           if (mockTask) {
-            mockTask.completed = savedTask.completed;
+            mockTask.completed = !!t.completed; // Ensure boolean
           } else {
             // User-added task
-            this.tasks.push(savedTask);
+            this.tasks.push(t);
           }
         });
       }
@@ -139,6 +182,12 @@ export class TaskService implements ITaskService {
       ...taskData,
       id: String(Date.now()), // Use timestamp for unique ID
     };
+
+    // Security: Validate before adding
+    if (!this.isValidTask(newTask)) {
+      throw new Error("Invalid task data");
+    }
+
     this.tasks.push(newTask);
     this.saveToStorage();
     return this.simulateApiCall(newTask);
