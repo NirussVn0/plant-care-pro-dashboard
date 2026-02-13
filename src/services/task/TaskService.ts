@@ -1,4 +1,5 @@
 import { Task } from "@/models/Task";
+import { isValidTaskData } from "./TaskValidator";
 
 /**
  * Mock data store for tasks.
@@ -70,21 +71,31 @@ export class TaskService implements ITaskService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const savedTasks: Task[] = JSON.parse(stored);
-        // Restore dates (JSON parsing loses Date objects)
-        savedTasks.forEach((t) => {
-          t.date = new Date(t.date);
-        });
-        // Merge: update mock tasks if completed, add new tasks
-        savedTasks.forEach((savedTask) => {
-          const mockTask = this.tasks.find((t) => t.id === savedTask.id);
-          if (mockTask) {
-            mockTask.completed = savedTask.completed;
-          } else {
-            // User-added task
-            this.tasks.push(savedTask);
-          }
-        });
+        const parsed = JSON.parse(stored);
+
+        if (Array.isArray(parsed)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          parsed.forEach((t: any) => {
+            // Sanitize: truncate long notes to avoid data loss on legacy items
+            if (typeof t.note === "string" && t.note.length > 500) {
+              t.note = t.note.substring(0, 500);
+            }
+
+            // Security check: validate data structure before processing
+            if (!isValidTaskData(t)) return;
+
+            // Restore date (JSON parsing loses Date objects)
+            const savedTask = { ...t, date: new Date(t.date) } as Task;
+
+            const mockTask = this.tasks.find((mt) => mt.id === savedTask.id);
+            if (mockTask) {
+              mockTask.completed = savedTask.completed;
+            } else {
+              // User-added task
+              this.tasks.push(savedTask);
+            }
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to load tasks from storage", err);
