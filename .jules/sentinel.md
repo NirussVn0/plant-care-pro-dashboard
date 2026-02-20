@@ -17,3 +17,8 @@ This journal documents critical security learnings, vulnerability patterns, and 
 **Vulnerability:** Missing Content-Security-Policy allowed potential XSS vectors.
 **Learning:** Implementing strict CSP (`upgrade-insecure-requests`) breaks local development (HTTP) if not conditional. `unsafe-eval` is required for Next.js dev mode.
 **Prevention:** Use `process.env.NODE_ENV` to conditionally apply strict directives like `upgrade-insecure-requests` only in production.
+
+## 2025-02-21 - Insecure LocalStorage Deserialization
+**Vulnerability:** Services (e.g., `TaskService`) trust `localStorage` data implicitly, using `JSON.parse` without validation, allowing potential injection of malformed or malicious objects if storage is compromised.
+**Learning:** Client-side persistence layers (like `localStorage` mocks) are untrusted input sources. `JSON.parse` destroys type safety.
+**Prevention:** Implement strict validators (e.g., `TaskValidator`) for all data loaded from storage before merging into application state.
