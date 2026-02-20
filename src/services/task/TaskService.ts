@@ -1,4 +1,5 @@
 import { Task } from "@/models/Task";
+import { isValidTaskData } from "./TaskValidator";
 
 /**
  * Mock data store for tasks.
@@ -64,19 +65,30 @@ export class TaskService implements ITaskService {
   private loadFromStorage(): void {
     // Start with mock data
     this.tasks = [...MOCK_TASKS];
-    
+
     if (typeof window === "undefined") return;
-    
+
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const savedTasks: Task[] = JSON.parse(stored);
-        // Restore dates (JSON parsing loses Date objects)
-        savedTasks.forEach((t) => {
-          t.date = new Date(t.date);
-        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawTasks: any[] = JSON.parse(stored);
+
+        // Filter and restore valid tasks
+        const validTasks = rawTasks
+          .filter((t) => isValidTaskData(t))
+          .map((t) => {
+            const task = { ...t };
+            task.date = new Date(task.date);
+            // Additional sanitization: truncate note if somehow bypassed
+            if (task.note && task.note.length > 500) {
+              task.note = task.note.substring(0, 500);
+            }
+            return task as Task;
+          });
+
         // Merge: update mock tasks if completed, add new tasks
-        savedTasks.forEach((savedTask) => {
+        validTasks.forEach((savedTask) => {
           const mockTask = this.tasks.find((t) => t.id === savedTask.id);
           if (mockTask) {
             mockTask.completed = savedTask.completed;
@@ -135,6 +147,10 @@ export class TaskService implements ITaskService {
   }
 
   async addTask(taskData: Omit<Task, "id">): Promise<Task> {
+    if (!isValidTaskData(taskData)) {
+      throw new Error("Invalid task data");
+    }
+
     const newTask: Task = {
       ...taskData,
       id: String(Date.now()), // Use timestamp for unique ID
