@@ -1,4 +1,5 @@
 import { Task } from "@/models/Task";
+import { isValidTaskData } from "./TaskValidator";
 
 /**
  * Mock data store for tasks.
@@ -70,13 +71,18 @@ export class TaskService implements ITaskService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const savedTasks: Task[] = JSON.parse(stored);
+        const parsed: Task[] = JSON.parse(stored);
+
+        // Filter out any tasks that don't match our schema (prevents XSS/injection via storage manipulation)
+        const validTasks = parsed.filter((t) => isValidTaskData(t));
+
         // Restore dates (JSON parsing loses Date objects)
-        savedTasks.forEach((t) => {
+        validTasks.forEach((t) => {
           t.date = new Date(t.date);
         });
+
         // Merge: update mock tasks if completed, add new tasks
-        savedTasks.forEach((savedTask) => {
+        validTasks.forEach((savedTask) => {
           const mockTask = this.tasks.find((t) => t.id === savedTask.id);
           if (mockTask) {
             mockTask.completed = savedTask.completed;
@@ -135,6 +141,10 @@ export class TaskService implements ITaskService {
   }
 
   async addTask(taskData: Omit<Task, "id">): Promise<Task> {
+    if (!isValidTaskData(taskData)) {
+      throw new Error("Invalid task data");
+    }
+
     const newTask: Task = {
       ...taskData,
       id: String(Date.now()), // Use timestamp for unique ID
