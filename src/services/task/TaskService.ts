@@ -1,4 +1,5 @@
 import { Task } from "@/models/Task";
+import { isValidTaskData } from "./TaskValidator";
 
 /**
  * Mock data store for tasks.
@@ -77,6 +78,11 @@ export class TaskService implements ITaskService {
         });
         // Merge: update mock tasks if completed, add new tasks
         savedTasks.forEach((savedTask) => {
+          if (!isValidTaskData(savedTask)) {
+            console.warn("Invalid task data found in storage, skipping:", savedTask);
+            return;
+          }
+
           const mockTask = this.tasks.find((t) => t.id === savedTask.id);
           if (mockTask) {
             mockTask.completed = savedTask.completed;
@@ -139,6 +145,11 @@ export class TaskService implements ITaskService {
       ...taskData,
       id: String(Date.now()), // Use timestamp for unique ID
     };
+
+    if (!isValidTaskData(newTask)) {
+      throw new Error("Invalid task data");
+    }
+
     this.tasks.push(newTask);
     this.saveToStorage();
     return this.simulateApiCall(newTask);
