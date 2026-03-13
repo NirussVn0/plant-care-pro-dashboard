@@ -26,3 +26,8 @@ This journal documents critical security learnings, vulnerability patterns, and 
 **Vulnerability:** Untrusted and unvalidated data deserialized via `JSON.parse` from `localStorage` in `TaskService.ts`, allowing arbitrarily large string notes.
 **Learning:** `localStorage` is completely controlled by the client and must be treated as untrusted user input, even if the application originally set the value. Large payloads can cause Denial of Service (DoS) or UI hangs.
 **Prevention:** Implement strict schema validation (using custom validators or Zod) to verify shape, types, and constraints (like maximum string lengths) immediately after `JSON.parse` and before utilizing the data in application logic.
+
+## 2025-03-13 - Insecure Deserialization of User Data in AuthContext
+**Vulnerability:** Unvalidated user data was loaded from `localStorage` in `AuthContext.tsx`, exposing the application to potential injection or DoS attacks via maliciously crafted or oversized data.
+**Learning:** Similar to the task data issue, user authentication and session data stored in `localStorage` requires rigorous validation (type, length, and format, such as verifying URLs for avatars) before being set in application state.
+**Prevention:** Apply type guards and strict length/format checks to all objects retrieved from `localStorage` before hydrating the client-side state.

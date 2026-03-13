@@ -18,6 +18,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isValidUser(data: any): data is User {
+  if (!data || typeof data !== "object") return false;
+  if (typeof data.name !== "string" || data.name.length > 100) return false;
+  if (typeof data.email !== "string" || data.email.length > 255) return false;
+  if (data.avatar !== undefined) {
+    if (typeof data.avatar !== "string" || data.avatar.length > 2048) return false;
+    try {
+      new URL(data.avatar);
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -42,8 +58,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (isValidUser(parsed)) {
+          setUser(parsed);
+        } else {
+          localStorage.removeItem("user");
+        }
       } catch {
         localStorage.removeItem("user");
       }
