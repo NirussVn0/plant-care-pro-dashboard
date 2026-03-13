@@ -14,21 +14,17 @@ export interface IPlantService {
   searchPlants(query: string, categories: PlantCategory[], difficulty: PlantDifficulty | null): Promise<Plant[]>;
 }
 
-/**
- * Service class for managing plant data.
- * Implements IPlantService interface with mock data storage.
- */
 export class PlantService implements IPlantService {
-  private readonly baseUrl = "http://localhost:3000/plants";
+  private readonly baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   async getAllPlants(): Promise<Plant[]> {
-    const res = await fetch(this.baseUrl);
+    const res = await fetch(`${this.baseUrl}/plants`);
     if (!res.ok) throw new Error("Failed to fetch plants");
     return res.json();
   }
 
   async getPlantById(id: string): Promise<Plant | undefined> {
-    const res = await fetch(`${this.baseUrl}/${id}`);
+    const res = await fetch(`${this.baseUrl}/plants/${id}`);
     if (!res.ok) return undefined;
     return res.json();
   }
@@ -48,7 +44,6 @@ export class PlantService implements IPlantService {
   }
 
   async getCategories(): Promise<PlantCategory[]> {
-    // These could be fetched from backend config entirely, but hardcoded is fine for now
     return ["Succulents", "Tropical", "Ferns", "Cacti", "Flowering"];
   }
 

@@ -2,6 +2,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DailyTasks from "@/components/dashboard/DailyTasks";
 import MyJunglePreview from "@/components/dashboard/MyJunglePreview";
 import GrowthTrends from "@/components/dashboard/GrowthTrends";
+import NutrientSchedule from "@/components/dashboard/NutrientSchedule";
 import CareLogs from "@/components/dashboard/CareLogs";
 
 export default function Home() {
@@ -23,8 +24,9 @@ export default function Home() {
               <MyJunglePreview />
               <CareLogs />
             </div>
-            <div className="md:col-span-1">
+            <div className="md:col-span-1 space-y-6">
               <GrowthTrends />
+              <NutrientSchedule />
             </div>
           </div>
         </div>

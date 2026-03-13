@@ -49,14 +49,12 @@ class AnimationService implements IAnimationService {
   hasPlayed(key: string): boolean {
     if (typeof window === "undefined") return false;
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
+      // Use sessionStorage so it resets when the tab is closed, but persists on reload (F5)
+      // This fulfills "req effect only load when new" for the session.
+      const stored = sessionStorage.getItem(this.STORAGE_KEY);
       if (!stored) return false;
       const data: Record<string, number> = JSON.parse(stored);
-      const timestamp = data[key];
-      if (!timestamp) return false;
-      // Check if TTL has expired
-      const now = Date.now();
-      return now - timestamp < this.TTL_MS;
+      return !!data[key];
     } catch {
       return false;
     }
@@ -69,10 +67,10 @@ class AnimationService implements IAnimationService {
   markPlayed(key: string): void {
     if (typeof window === "undefined") return;
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
+      const stored = sessionStorage.getItem(this.STORAGE_KEY);
       const data: Record<string, number> = stored ? JSON.parse(stored) : {};
       data[key] = Date.now();
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Ignore storage errors
     }
@@ -83,7 +81,7 @@ class AnimationService implements IAnimationService {
    */
   clearPlayedAnimations(): void {
     if (typeof window === "undefined") return;
-    localStorage.removeItem(this.STORAGE_KEY);
+    sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
   /**

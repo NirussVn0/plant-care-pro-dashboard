@@ -11,7 +11,7 @@ interface DayDetailsProps {
   selectedDate: Date;
   tasks: Task[];
   onCompleteTask: (taskId: string) => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 /**
@@ -67,9 +67,11 @@ export default function DayDetails({ selectedDate, tasks, onCompleteTask, onClos
           <h2 className="text-xl font-bold text-text-main dark:text-text-inverse">{format(selectedDate, "EEEE")}</h2>
           <p className="text-sm text-primary font-medium">{format(selectedDate, "MMMM do, yyyy")}</p>
         </div>
-        <button onClick={onClose} className="lg:hidden p-2 text-primary">
-          Close
-        </button>
+        {onClose && (
+          <button type="button" onClick={onClose} className="lg:hidden p-2 text-primary">
+            Close
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
