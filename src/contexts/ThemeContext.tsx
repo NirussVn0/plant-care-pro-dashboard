@@ -39,9 +39,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored) {
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark" || stored === "system") {
       setThemeState(stored);
+    } else if (stored !== null) {
+      // Remove invalid data from storage
+      localStorage.removeItem("theme");
     }
     setSystemPreference(
       window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"

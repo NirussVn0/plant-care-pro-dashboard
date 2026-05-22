@@ -31,3 +31,8 @@ This journal documents critical security learnings, vulnerability patterns, and 
 **Vulnerability:** Unvalidated user data was loaded from `localStorage` in `AuthContext.tsx`, exposing the application to potential injection or DoS attacks via maliciously crafted or oversized data.
 **Learning:** Similar to the task data issue, user authentication and session data stored in `localStorage` requires rigorous validation (type, length, and format, such as verifying URLs for avatars) before being set in application state.
 **Prevention:** Apply type guards and strict length/format checks to all objects retrieved from `localStorage` before hydrating the client-side state.
+
+## 2025-05-22 - Insecure Theme Data Deserialization
+**Vulnerability:** The application was extracting the "theme" value directly from `localStorage` without validating if the content adhered to expected enum values ("light", "dark", "system").
+**Learning:** `localStorage` is untrusted data and can be altered by users. If a malicious or large payload is stored, it could lead to improper UI states or potential DoS if expected values are not validated.
+**Prevention:** Always strictly validate `localStorage` contents for proper typing and values immediately after extraction and before use in application context, applying default fallback strategies when invalid data is detected.
