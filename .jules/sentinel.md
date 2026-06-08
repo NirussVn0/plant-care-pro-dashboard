@@ -31,3 +31,7 @@ This journal documents critical security learnings, vulnerability patterns, and 
 **Vulnerability:** Unvalidated user data was loaded from `localStorage` in `AuthContext.tsx`, exposing the application to potential injection or DoS attacks via maliciously crafted or oversized data.
 **Learning:** Similar to the task data issue, user authentication and session data stored in `localStorage` requires rigorous validation (type, length, and format, such as verifying URLs for avatars) before being set in application state.
 **Prevention:** Apply type guards and strict length/format checks to all objects retrieved from `localStorage` before hydrating the client-side state.
+## 2025-03-24 - Missing URL Protocol Validation for LocalStorage Avatars
+**Vulnerability:** The `isValidUser` function in `AuthContext.tsx` checked that `avatar` was a valid URL, but did not restrict the protocol. This could allow `javascript:` or `data:` URIs if an attacker could poison `localStorage`, potentially leading to Stored DOM XSS when the avatar URL is used in components.
+**Learning:** `new URL()` validation alone is insufficient to prevent XSS via URLs. It only guarantees structural validity, not safety.
+**Prevention:** Always restrict URL schemes to safe protocols like `http:` and `https:` when validating URLs that might be rendered as `href` or `src` attributes.

@@ -26,7 +26,10 @@ function isValidUser(data: any): data is User {
   if (data.avatar !== undefined) {
     if (typeof data.avatar !== "string" || data.avatar.length > 2048) return false;
     try {
-      new URL(data.avatar);
+      const parsedUrl = new URL(data.avatar);
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        return false;
+      }
     } catch {
       return false;
     }
